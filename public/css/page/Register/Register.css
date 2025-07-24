@@ -1,0 +1,91 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body,
+html {
+    height: 100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: url("../../../assets/register/wallpaperLogin.png") no-repeat
+        center center fixed;
+    background-size: cover;
+    color: #fff;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+}
+
+.forms {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    width: 450px;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.forms h1 {
+    margin-bottom: 25px;
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.authorization-warning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 165, 0, 0.2);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #ffc107;
+    font-weight: 600;
+    margin-bottom: 40px;
+    box-shadow: 0 0 12px #ffb300;
+    user-select: none;
+}
+
+.authorization-warning::before {
+    content: "⚠️";
+    font-size: 30px;
+}
+
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background-color: white;
+    color: #444;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    user-select: none;
+}
+
+.google-btn img {
+    width: 24px;
+    height: 24px;
+}
+
+.google-btn:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.25);
+    color: #222;
+}
