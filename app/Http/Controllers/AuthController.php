@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -12,12 +14,30 @@ class AuthController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function handleGoogleCallback(Request $request)
+    public function handleGoogleCallback()
     {
-        // Handle the callback from Google after authentication
-        // You can retrieve the user information and log them in or register them
-        // For now, just return a success message
-        return response()->json(['message' => 'Google authentication successful!']);
+        //fatching the acesstoken
+        $user = Socialite::driver('google')->user();
+        
+        //find or create user
+        $authUser = User::firstOrCreate(
+            ['email' => $user->getEmail()],
+            [
+                'name' => $user->getName(),
+                'google_id' => $user->getId(),
+                'avatar' => $user->getAvatar(),
+                //se possivel pensar em adicionar uma senha aleatória
+                //pois caso futuramente usemos podemos redefinir a senha
+                //'password' => bcrypt(\Illuminate\Support\Str::random(16))
+
+            ]
+        );
+
+        //logic in the user
+        Auth::login($authUser, true);
+
+        //redirect to home
+        return redirect('/');
     }
 
     public function logout()

@@ -9,5 +9,6 @@ Route::get('/', [AuthController::class, 'index']);
 Route::get('/singin', [AuthController::class, 'register']);
 
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
-// Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 // Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
