@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return view('page.HomeScreen');
-});
 
-Route::get('/singin', function () {
-    return view('page.RegisterScreen');
-});
+Route::get('/', [AuthController::class, 'index']);
+
+Route::get('/singin', [AuthController::class, 'register']);
+
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
+// Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

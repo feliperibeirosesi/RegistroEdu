@@ -24,7 +24,7 @@
             <p class="authorization-warning">
                 Atenção: o acesso ao site será permitido somente após autorização de um administrador.
             </p>
-            <a type="submit" class="google-btn" id="google-btn">
+            <a type="submit" href="{{ url('auth/google') }}" class="google-btn" id="google-btn">
                 <img src="{{ asset('assets/register/google-icon.png') }}" alt="Google" />
                 Entrar com Google
             </a>

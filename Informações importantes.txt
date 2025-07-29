@@ -1,0 +1,6 @@
+Primeiramente gostária de salvar aqui o ID do cliente para utilizar a API do OAuth 2.0, elas são importantes
+no .env
+ID do cliente
+647778706419-3mc81t8aojc66rli3u1vce21tj9a8hmi.apps.googleusercontent.com
+Chave secreta do cliente
+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
