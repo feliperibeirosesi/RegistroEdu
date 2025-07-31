@@ -28,7 +28,7 @@ class AuthController extends Controller
                 'avatar' => $user->getAvatar(),
                 //se possivel pensar em adicionar uma senha aleatória
                 //pois caso futuramente usemos podemos redefinir a senha
-                //'password' => bcrypt(\Illuminate\Support\Str::random(16))
+                'password' => bcrypt(\Illuminate\Support\Str::random(16))
 
             ]
         );
