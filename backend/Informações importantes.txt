@@ -1,0 +1,2 @@
+ID do cliente: 647778706419-3mc81t8aojc66rli3u1vce21tj9a8hmi.apps.googleusercontent.com
+Chave secreta do cliente: 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
