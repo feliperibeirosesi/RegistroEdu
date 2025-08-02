@@ -512,19 +512,6 @@ Para mais detalhes, consulte o [arquivo LICENSE](LICENSE) ou acesse [GNU GPL v3.
 
 ---
 
-## 📞 Suporte e Comunidade
-
-<div align="center">
-
-### 🤝 **Entre em Contato**
-
-[![Email](https://img.shields.io/badge/Email-contato@registroedu.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:contato@registroedu.com)
-[![GitHub Issues](https://img.shields.io/badge/Issues-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/joaopaulopereirarezendesesi/RegistroEdu/issues)
-[![Documentation](https://img.shields.io/badge/Docs-Wiki-blue?style=for-the-badge&logo=gitbook&logoColor=white)](https://github.com/joaopaulopereirarezendesesi/RegistroEdu/wiki)
-[![Discussions](https://img.shields.io/badge/Discussões-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/joaopaulopereirarezendesesi/RegistroEdu/discussions)
-
-</div>
-
 ### 📈 **Roadmap**
 
 - 🔄 **v2.0** - Sistema de Notas e Avaliações
