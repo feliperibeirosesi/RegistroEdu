@@ -1,0 +1,339 @@
+/* Estilo desktop - menu extenso como navbar */
+.profile-icon {
+    display: none; /* Esconde o ícone no desktop */
+}
+
+/* Menu extenso para desktop */
+.profile-menu {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    min-width: auto;
+    box-shadow: none;
+    display: flex;
+    z-index: auto;
+    margin: 0;
+    transform-origin: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+}
+
+.profile-menu.show {
+    display: flex;
+    animation: none;
+}
+
+.profile-menu a {
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin: 0;
+    font-weight: 500;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    position: relative;
+}
+
+.profile-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.profile-menu a:not(:last-child)::after {
+    display: none;
+}
+
+/* Links específicos com cores */
+.profile-menu a[href*="logout"],
+.profile-menu a[href*="sair"] {
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.profile-menu a[href*="logout"]:hover,
+.profile-menu a[href*="sair"]:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-bottom-color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.6);
+}
+
+.profile-menu a[href*="perfil"],
+.profile-menu a[href*="profile"] {
+    color: #4ecdc4;
+    border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+.profile-menu a[href*="perfil"]:hover,
+.profile-menu a[href*="profile"]:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-bottom-color: #4ecdc4;
+    border-color: rgba(78, 205, 196, 0.6);
+}
+
+/* Estado vazio */
+.profile-menu-empty {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    font-style: italic;
+    margin: 0;
+    padding: 12px 24px;
+    user-select: none;
+}
+
+/* Responsividade - tablet - ainda mantém o menu extenso */
+@media (max-width: 768px) {
+    .profile-menu {
+        gap: 1rem;
+    }
+
+    .profile-menu a {
+        padding: 10px 16px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Responsividade mobile - muda para estilo dropdown compacto */
+@media (max-width: 480px) {
+    .profile-icon {
+        display: flex;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(0, 0, 0, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        cursor: pointer;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        color: white;
+        transition: all 0.3s ease;
+        user-select: none;
+        z-index: 1001;
+        outline: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .profile-icon:hover {
+        background-color: rgba(0, 0, 0, 0.9);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    .profile-icon:active {
+        transform: scale(0.95);
+    }
+
+    .profile-icon:focus {
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-icon .fa-circle-user {
+        font-size: 1.5rem;
+        color: white;
+        transition: color 0.3s ease;
+    }
+
+    .profile-icon:hover .fa-circle-user {
+        color: #f0f0f0;
+    }
+
+    .profile-menu {
+        position: fixed;
+        top: 70px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        min-width: 160px;
+        padding: 8px 0;
+        display: none;
+        flex-direction: column;
+        transform-origin: top right;
+        z-index: 1000;
+        overflow: hidden;
+        gap: 0;
+    }
+
+    .profile-menu.show {
+        display: flex;
+        animation: slideDownFade 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+            forwards;
+    }
+
+    @keyframes slideDownFade {
+        0% {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .profile-menu a {
+        display: block;
+        padding: 12px 20px;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+        border-bottom: none;
+        border-radius: 0;
+        position: relative;
+        transform: none;
+        box-shadow: none;
+        border: none;
+    }
+
+    .profile-menu a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: rgba(255, 255, 255, 0.6);
+        padding-left: 24px;
+        transform: none;
+        border-bottom: none;
+    }
+
+    .profile-menu a:active {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .profile-menu a:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 20px;
+        right: 20px;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        display: block;
+    }
+
+    .profile-menu a[href*="logout"],
+    .profile-menu a[href*="sair"] {
+        color: #ff6b6b;
+        border: none;
+    }
+
+    .profile-menu a[href*="logout"]:hover,
+    .profile-menu a[href*="sair"]:hover {
+        background: rgba(255, 107, 107, 0.1);
+        border-left-color: #ff6b6b;
+        border: none;
+    }
+
+    .profile-menu a[href*="perfil"],
+    .profile-menu a[href*="profile"] {
+        color: #4ecdc4;
+        border: none;
+    }
+
+    .profile-menu a[href*="perfil"]:hover,
+    .profile-menu a[href*="profile"]:hover {
+        background: rgba(78, 205, 196, 0.1);
+        border-left-color: #4ecdc4;
+        border: none;
+    }
+
+    .profile-menu-empty {
+        padding: 12px 20px;
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+        font-size: 0.85rem;
+        user-select: none;
+        text-align: center;
+        border-left: 3px solid transparent;
+        cursor: default;
+        transition: color 0.2s ease;
+    }
+
+    .profile-menu-empty:hover {
+        color: rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    .profile-icon,
+    .profile-menu,
+    .profile-menu a {
+        transition: none;
+    }
+
+    .profile-menu.show {
+        animation: none;
+    }
+}
+
+/* Tema claro (se disponível) */
+@media (prefers-color-scheme: light) {
+    @media (max-width: 480px) {
+        .profile-icon {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-icon:hover {
+            background-color: rgba(255, 255, 255, 1);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-icon .fa-circle-user {
+            color: #333;
+        }
+
+        .profile-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-menu a {
+            color: #333;
+        }
+
+        .profile-menu a:hover {
+            background: rgba(0, 0, 0, 0.05);
+            border-left-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .profile-menu-empty {
+            color: rgba(0, 0, 0, 0.6);
+        }
+    }
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 12px 4px rgba(255, 255, 255, 0.7);
+    }
+    100% {
+        box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.3);
+    }
+}
+
+.profile-icon.glowing {
+    animation: pulseGlow 2s infinite ease-in-out;
+    border-color: rgba(255, 255, 255, 0.6);
+}
