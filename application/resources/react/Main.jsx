@@ -4,8 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { ErrorProvider, useError } from './contexts/ErrorContext';
 import App from './App';
-import ErrorPage from './components/Error';
+import ErrorPage from './components/Error'; // página de erro personalizada
 
+//decide se mostra a aplicação ou a página de erro
 function AppContent() {
     const { error } = useError();
 
@@ -16,6 +17,7 @@ function AppContent() {
     return <App />;
 }
 
+//envolve toda a aplicação com provedores e roteamento
 function Main() {
     return (
         <ErrorProvider>
@@ -26,6 +28,7 @@ function Main() {
     );
 }
 
+// Aguarda o carregamento do DOM antes de montar o React
 document.addEventListener('DOMContentLoaded', () => {
     const mountEl = document.getElementById('root');
     if (mountEl) {

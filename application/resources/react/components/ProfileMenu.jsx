@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import '../styles/components/ProfileMenu.css';
+// importa os estilos do menu perfil
 
 export default function ProfileMenu() {
+    // estado que controla se o menu está aberto ou fechado
     const [open, setOpen] = useState(false);
 
     return (
