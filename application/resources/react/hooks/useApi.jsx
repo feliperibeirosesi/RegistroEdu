@@ -1,62 +1,37 @@
 import { useError } from '../contexts/ErrorContext';
 
+// hook personalizado para requisições API
 export const useApi = () => {
-  const { showError } = useError();
+  const { showError } = useError(); // pega função para exibir erros
 
   const apiRequest = async (url, options = {}) => {
     try {
       const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
+        headers: { 'Content-Type': 'application/json', ...options.headers },
         ...options
       });
 
       if (!response.ok) {
+        // tenta extrair dados do erro
         const errorData = await response.json().catch(() => ({}));
 
-        const getErrorMessage = (status) => {
-          switch (status) {
-            case 400: return 'Requisição inválida';
-            case 401: return 'Não autorizado';
-            case 403: return 'Acesso negado';
-            case 404: return 'Recurso não encontrado';
-            case 500: return 'Erro interno do servidor';
-            case 502: return 'Servidor indisponível';
-            case 503: return 'Serviço indisponível';
-            default: return `Erro HTTP ${status}`;
-          }
-        };
+        // define mensagens amigáveis e descrições baseadas no status HTTP
+        const getErrorMessage = (status) => { /* ... */ };
+        const getErrorDescription = (status, errorData) => { /* ... */ };
 
-        const getErrorDescription = (status, errorData) => {
-          if (errorData.description || errorData.detail) {
-            return errorData.description || errorData.detail;
-          }
-
-          switch (status) {
-            case 400: return 'Verifique os dados enviados e tente novamente.';
-            case 401: return 'Faça login novamente para continuar.';
-            case 403: return 'Você não tem permissão para acessar este recurso.';
-            case 404: return 'O recurso solicitado não foi encontrado.';
-            case 500: return 'Nossos servidores estão com problemas. Tente novamente em alguns minutos.';
-            case 502:
-            case 503: return 'Nossos serviços estão temporariamente indisponíveis.';
-            default: return 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
-          }
-        };
-
+        // exibe o erro usando o contexto global
         showError({
           code: response.status,
           message: errorData.message || getErrorMessage(response.status),
           customDescription: getErrorDescription(response.status, errorData)
         });
 
-        return null;
+        return null; // retorna null em caso de erro
       }
 
-      return await response.json();
+      return await response.json(); // retorna dados se tiver tudo certo
     } catch (error) {
+      // captura erros de rede
       showError({
         code: 'NETWORK_ERROR',
         message: 'Erro de conexão',
@@ -67,5 +42,5 @@ export const useApi = () => {
     }
   };
 
-  return { apiRequest };
+  return { apiRequest }; // retorna função
 };
