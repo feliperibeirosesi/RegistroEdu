@@ -127,6 +127,28 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
-    ],
+        'oauth' => [
+            'driver' => 'single',
+            'path' => base_path('logs/oauth.log'),
+            'level' => 'info',
+        ],
 
+        'security' => [
+            'driver' => 'single',
+            'path' => base_path('logs/security.log'),
+            'level' => 'warning',
+        ],
+
+        'system_errors' => [
+            'driver' => 'single',
+            'path' => base_path('logs/system_errors.log'),
+            'level' => 'error',
+        ],
+
+        'debug' => [
+            'driver' => 'single',
+            'path' => base_path('logs/debug.log'),
+            'level' => 'debug',
+        ],
+    ],
 ];

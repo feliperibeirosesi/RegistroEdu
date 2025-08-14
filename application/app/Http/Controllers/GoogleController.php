@@ -14,10 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleController extends Controller
 {
-    private array $allowedDomains = [
-        'professor.educacao.sp.gov.br',
-        'educacao.sp.gov.br',
-    ];
+    private array $allowedDomains = [];
 
     private JWTService $jwtService;
     private ProxyCheckService $proxyCheck;
@@ -26,6 +23,17 @@ class GoogleController extends Controller
     {
         $this->jwtService = $jwtService;
         $this->proxyCheck = $proxyCheck;
+
+        if (app()->environment('local', 'testing')) {
+            $this->allowedDomains = [
+                'gmail.com',
+            ];
+        } else {
+            $this->allowedDomains = [
+                'professor.educacao.sp.gov.br',
+                'educacao.sp.gov.br',
+            ];
+        }
     }
 
     public function redirectToGoogle()
@@ -42,39 +50,36 @@ class GoogleController extends Controller
             $ip = $request->get('real_ip', $request->ip());
             $ipInfo = $request->get('ip_info', $this->proxyCheck->checkIp($ip));
 
-            Log::info('Google OAuth attempt', [
+            Log::channel('oauth')->info('Google OAuth attempt', [
                 'email' => $email,
                 'ip' => $ip,
                 'country' => $ipInfo['country'] ?? 'Unknown',
                 'risk_score' => $ipInfo['risk_score'] ?? 0,
                 'is_proxy' => $ipInfo['is_proxy'] ?? false,
-                'is_vpn' => $ipInfo['is_vpn'] ?? false
+                'is_vpn' => $ipInfo['is_vpn'] ?? false,
+                'environment' => app()->environment(),
+                'allowed_domains' => $this->allowedDomains,
             ]);
 
             if ($this->shouldBlockOAuthLogin($ipInfo, $email)) {
-                Log::warning('OAuth login blocked', [
+                Log::channel('security')->warning('OAuth login blocked', [
                     'email' => $email,
                     'ip' => $ip,
-                    'reason' => 'High risk IP or suspicious activity'
+                    'reason' => 'High risk IP or suspicious activity',
+                    'is_proxy' => $ipInfo['is_proxy'] ?? false,
+                    'is_vpn' => $ipInfo['is_vpn'] ?? false,
+                    'domain_allowed' => $this->isAllowedDomain($email),
                 ]);
 
-                return redirect(config('app.frontend_url', '/') . '/login?error=security_block');
+                return redirect(config('app.frontend_url', '/') . '/login');
             }
-
-            // if (!$email) {
-            //     return Tools::res('E-mail não disponível', 400);
-            // }
-
-            // if (!$this->isAllowedDomain($email)) {
-            //     return Tools::res('Domínio não autorizado', 403);
-            // }
 
             $user = $this->findOrCreateUser($googleUser, $ip, $ipInfo);
 
             $accessToken = $this->jwtService->generateAccessToken($user);
             $refreshToken = $this->jwtService->generateRefreshToken($user);
 
-            Log::info('Google OAuth successful', [
+            Log::channel('oauth')->info('Google OAuth successful', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'ip' => $ip,
@@ -103,7 +108,7 @@ class GoogleController extends Controller
                 ->cookie('refresh_token', $refreshToken, config('jwt.refresh_ttl', 20160), null, null, true, true);
 
         } catch (\Exception $e) {
-            Log::error('Google OAuth error', [
+            Log::channel('system_errors')->error('Google OAuth error', [
                 'error' => $e->getMessage(),
                 'ip' => $request->get('real_ip', $request->ip()),
                 'trace' => $e->getTraceAsString()
@@ -113,7 +118,7 @@ class GoogleController extends Controller
                 return Tools::res('Erro no login com Google', 500);
             }
 
-            return redirect(config('app.frontend_url', '/') . '/login?error=oauth_failed');
+            return redirect(config('app.frontend_url', '/') . '/login');
         }
     }
 
@@ -145,11 +150,11 @@ class GoogleController extends Controller
                 'provider_id' => $googleUser->getId(),
                 'last_login_at' => now(),
                 'last_login_ip' => $ip,
-                'ip_info' => $ipInfo
+                'ip_info' => $ipInfo,
+                'password' => bcrypt(Str::random(32))
             ]);
         }
 
         return $user;
     }
 }
-

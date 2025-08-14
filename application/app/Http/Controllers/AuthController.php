@@ -37,27 +37,6 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
-    {
-        $refreshToken = $request->input('refresh_token') ?: $request->cookie('refresh_token');
-
-        if ($refreshToken) {
-            $this->jwtService->revokeRefreshToken($refreshToken);
-        }
-
-        $user = $request->user();
-        if ($user) {
-            Log::info('User logout', [
-                'user_id' => $user->id,
-                'ip' => $request->get('real_ip', $request->ip())
-            ]);
-        }
-
-        return Tools::res('Logout realizado com sucesso')
-            ->withoutCookie('access_token')
-            ->withoutCookie('refresh_token');
-    }
-
     public function me(Request $request)
     {
         $user = $request->user();
