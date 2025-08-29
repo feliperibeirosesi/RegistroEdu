@@ -27,19 +27,19 @@ class GoogleController extends Controller
             $googleUser = Socialite::driver('google')->user();
             $email = $googleUser->getEmail();
 
-            if (!$email) {
-                return Tools::res(
-                    'E-mail não disponível',
-                    400
-                );
-            }
+            // if (!$email) {
+            //     return Tools::res(
+            //         'E-mail não disponível',
+            //         400
+            //     );
+            // }
 
-            if (!$this->isAllowedDomain($email)) {
-                return Tools::res(
-                    'Domínio não autorizado',
-                    403
-                );
-            }
+            // if (!$this->isAllowedDomain($email)) {
+            //     return Tools::res(
+            //         'Domínio não autorizado',
+            //         403
+            //     );
+            // }
 
             $user = $this->findOrCreateUser($googleUser);
 
