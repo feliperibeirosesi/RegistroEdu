@@ -4,7 +4,7 @@ import { Button } from "antd";
 
 const ToggleThemeButton = ({ darkTheme, toggleTheme }) => {
   return (<div className="toggle-theme-btn">
-    <Button style={{ background: darkTheme ? "rgb(0, 21, 41)" : "rgb(255, 255, 255)", color: darkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)" }} onClick={toggleTheme}>
+    <Button style={{ background: darkTheme ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)", color: darkTheme ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)" }} onClick={toggleTheme}>
       {darkTheme ? <HiOutlineSun /> : <HiOutlineMoon />}
     </Button>
   </div >

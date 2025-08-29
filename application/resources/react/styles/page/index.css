@@ -7,17 +7,45 @@
   box-sizing: border-box;
 }
 
-.sidebar {
-  color: #fff;
-  transition: all 0.5s ease
+
+
+body.light {
+  background-color: #ffffff;
+  color: #000000;
+  height: 100vh;
 }
+
+
+body.dark {
+  background-color: #000000;
+  color: #ffffff;
+  height: 100vh;
+}
+
+
+body.light .sidebar {
+  background-color: #ffffff;
+  color: #000000;
+
+  height: 100vh;
+}
+
+body.dark .sidebar {
+  background-color: #000000;
+  color: #ffffff;
+
+  height: 100vh;
+}
+
+
 
 .logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: inherit;
   padding: 10px;
+
 }
 
 .logo-icon {
@@ -29,6 +57,19 @@
   font-size: 1.5rem;
   border-radius: 50%;
   background: rgba(28, 17, 41, 0.88);
+
+}
+
+.ant-menu-dark,
+:where(.css-dev-only-do-not-override-1qh2bz5).ant-menu-dark>.ant-menu {
+  color: rgb(255, 255, 255);
+  background: rgb(0, 0, 0);
+}
+
+.ant-layout-light,
+:where(.css-dev-only-do-not-override-l9pxc0).ant-layout {
+  color: rgb(0, 0, 0);
+  background-color: rgb(255, 255, 255);
 }
 
 .menu-bar {
@@ -39,8 +80,10 @@
   gap: 15px;
   font-size: 1rem;
   position: relative;
-  transition: all 0.5s ease
+  color: inherit;
+
 }
+
 
 .toggle-theme-btn {
   position: absolute;
@@ -50,8 +93,207 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
+  color: inherit;
+
 }
+
 
 .toggle {
   margin-left: 15px;
+  color: inherit;
+
+}
+
+.div1 {
+  height: 150px;
+  width: 250px;
+  position: absolute;
+  top: 15%;
+  left: 47%;
+  border-radius: 30px;
+}
+
+.dark button:hover {
+  background-color: rgb(255, 0, 0);
+}
+
+.boneco {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 3%;
+  left: 3%;
+}
+
+.seta {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 2%;
+  left: 380%;
+}
+
+.ant-btn {
+  font-size: 18px;
+}
+
+.ant-btn.ant-btn-icon-only {
+  width: 50px;
+}
+
+
+
+
+.div2 {
+  height: 150px;
+  width: 250px;
+  position: absolute;
+  top: 15%;
+  left: 64.5%;
+  border-radius: 30px;
+}
+
+.seta2 {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 4%;
+  left: 77.3%;
+}
+
+.estudante {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 4%;
+  left: 3%;
+}
+
+.div3 {
+  height: 150px;
+  width: 250px;
+  position: absolute;
+  top: 15%;
+  left: 82%;
+  border-radius: 30px;
+
+}
+
+.bolsa {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 4%;
+  left: 3%;
+
+}
+
+.seta3 {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 4%;
+  left: 77.3%;
+}
+
+.all {
+  height: 45px;
+  width: 70px;
+  position: absolute;
+  top: 43%;
+  left: 15%;
+  border-radius: 30px;
+
+}
+
+p {
+  font-size: 14px;
+}
+
+.engagement {
+  height: 45px;
+  width: 120px;
+  position: absolute;
+  top: 43%;
+  left: 20%;
+  border-radius: 30px;
+
+}
+
+.visit {
+  height: 45px;
+  width: 70px;
+  position: absolute;
+  top: 43%;
+  left: 28.3%;
+  border-radius: 30px;
+}
+
+.post {
+  height: 45px;
+  width: 70px;
+  position: absolute;
+  top: 43%;
+  left: 33.3%;
+  border-radius: 30px;
+}
+
+.div4 {
+  height: 330px;
+  width: 500px;
+  position: absolute;
+  top: 52%;
+  left: 15%;
+  border-radius: 30px;
+}
+
+.div5 {
+  height: 330px;
+  width: 350px;
+  position: absolute;
+  top: 52%;
+  left: 48.4%;
+  border-radius: 30px;
+}
+
+.div6 {
+  height: 330px;
+  width: 400px;
+  position: absolute;
+  top: 52%;
+  left: 72%;
+  border-radius: 30px;
+}
+
+.filtro {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 43%;
+  left: 73.5%;
+}
+
+.calendario {
+  height: 50px;
+  width: 50px;
+  border-radius: 90px;
+  position: absolute;
+  top: 43%;
+  left: 77.3%;
+}
+
+.DownloadPDF {
+  height: 50px;
+  width: 265px;
+  border-radius: 90px;
+  position: absolute;
+  top: 43%;
+  left: 81%;
 }

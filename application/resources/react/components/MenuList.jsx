@@ -8,10 +8,9 @@ const MenuList = ({ darkTheme }) => {
   return (
     <Menu theme={darkTheme ? 'dark' : 'light'} mode="inline" className="menu-bar">
       <Menu.Item key="home" icon={<HomeOutlined />}>Home</Menu.Item>
-      <Menu.SubMenu key="Documentos" icon={<IoFolderOutline />} title="Ocorrências">
-        <Menu.Item key="Suspensão" icon={<LuTimerOff />}>Suspensão</Menu.Item>
-        <Menu.Item key="Advertência" icon={<WarningOutlined />}>Advertência</Menu.Item>
-        <Menu.Item key="Expulsão" icon={<GrClose />}>Expulsão</Menu.Item></Menu.SubMenu>
+      <Menu.SubMenu key="Documentos" icon={<IoFolderOutline />} title="Documentação">
+        <Menu.Item key="Ocorrências" icon={<LuTimerOff />}>Ocorrências</Menu.Item>
+        <Menu.Item key="Planon" icon={<WarningOutlined />}>Planon</Menu.Item></Menu.SubMenu>
       <Menu.Item key="atividades" icon={<BookOutlined />}>Atividades</Menu.Item>
       <Menu.Item key="calendario" icon={<CalendarOutlined />}>Calendário</Menu.Item>
       <Menu.Item key="configuracoes" icon={<SettingOutlined />}>Configurações</Menu.Item>
