@@ -2,6 +2,13 @@ import TopBar from '../components/TopBar';
 import { useNavigate } from 'react-router-dom';
 import '../styles/page/register.css';
 
+//importanto uma biblioteca de recaptcha no react
+import Formulario from '../components/reCAPTCHA';
+
+function onChange(value) {
+    console.log("Captcha value:", value)
+}
+
 const Register = () => {
     const navigate = useNavigate();
     const isLoggedIn = false;
@@ -16,10 +23,12 @@ const Register = () => {
                 <p className="authorization-warning">
                     Atenção: o acesso ao site será permitido somente após autorização de um administrador.
                 </p>
-                <a href="/auth/google" className="google-btn" id="google-btn">
+                <a href="/auth/google" className="google-btn" id="google-btn"
+                >
                     <img src="./assets/register/google-icon.png" alt="Google" />
                     Entrar com Google
                 </a>
+                <Formulario />
             </div>
         </div>
     );
