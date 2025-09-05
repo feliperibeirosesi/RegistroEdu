@@ -3,9 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Services\ProxyCheckService;
+use App\Models\IpSecurityCheck;
+use App\Utils\Tools;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class ProxyCheckMiddleware
 {
@@ -21,8 +24,14 @@ class ProxyCheckMiddleware
         $ip = $this->getRealIpAddress($request);
         $config = $this->parseOptions($options);
 
+        $cachedResult = $this->getCachedSecurityCheck($ip);
+        if ($cachedResult) {
+            return $this->handleCachedResult($request, $next, $ip, $cachedResult, $config);
+        }
+
         if ($this->shouldBypassSecurityCheck($ip)) {
             $this->logBypassedCheck($request, $ip, 'IP whitelisted or development bypass');
+            $this->storeSecurityResult($ip, ['bypassed' => true, 'reason' => 'whitelisted']);
             return $next($request);
         }
 
@@ -31,9 +40,14 @@ class ProxyCheckMiddleware
 
         if ($this->shouldBlockRequest($ipInfo, $config)) {
             $this->logBlockedRequest($request, $ip, $ipInfo, $config);
+            $this->storeSecurityResult($ip, array_merge($ipInfo, [
+                'blocked' => true,
+                'block_reason' => $this->getBlockReasons($ipInfo, $config)
+            ]));
             return $this->createBlockResponse($ipInfo, $config);
         }
 
+        $this->storeSecurityResult($ip, array_merge($ipInfo, ['allowed' => true]));
         $this->attachSecurityInfoToRequest($request, $ip, $ipInfo);
 
         return $next($request);
@@ -189,8 +203,7 @@ class ProxyCheckMiddleware
             $reasons[] = sprintf('High risk IP address (score: %d)', $ipInfo['risk_score'] ?? 0);
         }
 
-        return response()->json([
-            'success' => false,
+        return Tools::res('Access denied due to security policy', 403, [
             'error' => 'Access denied due to security policy',
             'message' => 'Your connection has been blocked by our security system',
             'details' => [
@@ -200,7 +213,7 @@ class ProxyCheckMiddleware
                 'risk_score' => $ipInfo['risk_score'] ?? 0,
                 'timestamp' => now()->toISOString()
             ]
-        ], 403);
+        ]);
     }
 
     private function attachSecurityInfoToRequest(Request $request, string $ip, array $ipInfo): void
@@ -279,5 +292,112 @@ class ProxyCheckMiddleware
             ],
             'timestamp' => now()->toISOString()
         ]);
+    }
+
+    private function getCachedSecurityCheck(string $ip): ?array
+    {
+        $cached = Cache::get("security_check_$ip");
+        if ($cached && $cached['expires_at'] > now()) {
+            return $cached;
+        }
+
+        $dbResult = IpSecurityCheck::where('ip_address', $ip)
+            ->where('checked_at', '>', now()->subHours(24))
+            ->latest()
+            ->first();
+
+        if ($dbResult) {
+            $data = [
+                'ip_info' => $dbResult->security_data,
+                'checked_at' => $dbResult->checked_at,
+                'expires_at' => $dbResult->checked_at->addHours(24)
+            ];
+
+            Cache::put("security_check_$ip", $data, now()->addHours(24));
+
+            return $data;
+        }
+
+        return null;
+    }
+
+    private function handleCachedResult(Request $request, Closure $next, string $ip, array $cachedResult, array $config): mixed
+    {
+        $ipInfo = $cachedResult['ip_info'];
+
+        Log::channel('security')->info('Using cached security check', [
+            'ip' => $ip,
+            'cached_at' => $cachedResult['checked_at'],
+            'route' => $request->route()?->getName() ?? 'unknown'
+        ]);
+
+        if (isset($ipInfo['blocked']) && $ipInfo['blocked']) {
+            return $this->createBlockResponse($ipInfo, $config);
+        }
+
+        $this->attachSecurityInfoToRequest($request, $ip, $ipInfo);
+        return $next($request);
+    }
+
+    private function storeSecurityResult(string $ip, array $securityData): void
+    {
+        try {
+            IpSecurityCheck::updateOrCreate(
+                ['ip_address' => $ip],
+                [
+                    'security_data' => $securityData,
+                    'checked_at' => now(),
+                    'risk_score' => $securityData['risk_score'] ?? 0,
+                    'country' => $securityData['country'] ?? 'Unknown',
+                    'is_blocked' => $securityData['blocked'] ?? false
+                ]
+            );
+
+            Cache::put("security_check_$ip", [
+                'ip_info' => $securityData,
+                'checked_at' => now(),
+                'expires_at' => now()->addHours(24)
+            ], now()->addHours(24));
+
+        } catch (\Exception $e) {
+            Log::error('Failed to store security result', [
+                'ip' => $ip,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function getBlockReasons(array $ipInfo, array $config): array
+    {
+        $reasons = [];
+
+        if ($config['block_proxies'] && ($ipInfo['is_proxy'] ?? false)) {
+            $reasons[] = 'proxy_detected';
+        }
+
+        if ($config['block_vpns'] && ($ipInfo['is_vpn'] ?? false)) {
+            $reasons[] = 'vpn_detected';
+        }
+
+        if ($config['block_high_risk'] && ($ipInfo['risk_score'] ?? 0) >= $config['risk_threshold']) {
+            $reasons[] = 'high_risk_score';
+        }
+
+        return $reasons;
+    }
+
+    public static function getIpSecurityInfo(string $ip): ?array
+    {
+        $cached = Cache::get("security_check_$ip");
+        if ($cached && $cached['expires_at'] > now()) {
+            return $cached['ip_info'];
+        }
+
+        $dbResult = IpSecurityCheck::where('ip_address', $ip)
+            ->where('checked_at', '>', now()->subHours(24))
+            ->latest()
+            ->first();
+
+        return $dbResult ? $dbResult->security_data : null;
     }
 }
