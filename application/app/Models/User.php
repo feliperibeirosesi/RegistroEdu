@@ -20,19 +20,54 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'password',
-    ];
-
-    protected $hidden = [
-        'remember_token',
+        'provider',
+        'provider_id',
+        'last_login_at',
+        'last_login_ip',
+        'ip_info',
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'ip_info' => 'array',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token'
     ];
 
     public function sessions()
     {
         return $this->hasMany(Session::class);
+    }
+
+    public function refreshTokens()
+    {
+        return $this->hasMany(RefreshToken::class);
+    }
+
+    public function activeRefreshTokens()
+    {
+        return $this->refreshTokens()->valid();
+    }
+
+    public function getActiveSessionsCount(): int
+    {
+        return $this->activeRefreshTokens()->count();
+    }
+
+    public function revokeAllSessions(): int
+    {
+        return $this->refreshTokens()->active()->update(['is_active' => false]);
+    }
+
+    public function hasActiveSessionFrom(string $ipAddress): bool
+    {
+        return $this->activeRefreshTokens()
+            ->where('ip_address', $ipAddress)
+            ->exists();
     }
 
     public function setAvatarAttribute($value)

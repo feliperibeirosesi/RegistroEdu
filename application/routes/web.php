@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\AuthController;
 
+Route::get('/health', [HealthController::class, 'basic'])->name('health.basic');
+Route::get('/health/detailed', [HealthController::class, 'detailed'])->name('health.detailed');
+
 Route::middleware(['web', 'proxy.check:block-proxies,block-vpns,block-high-risk,risk-80'])->group(function () {
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
          ->name('auth.google.redirect');

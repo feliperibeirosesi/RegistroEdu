@@ -14,8 +14,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('google_id')->nullable()->after('password');
-            $table->string('avatar')->nullable()->after('google_id');
+            $table->string('google_id')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable();
+            $table->timestamp('last_login_at')->nullable();
+            $table->string('last_login_ip', 45)->nullable();
+            $table->json('ip_info')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

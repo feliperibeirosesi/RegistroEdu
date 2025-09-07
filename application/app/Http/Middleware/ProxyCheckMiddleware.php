@@ -81,6 +81,18 @@ class ProxyCheckMiddleware
     {
         $whitelist = config('security.ip_whitelist', []);
 
+        if (empty($whitelist)) {
+            return false;
+        }
+
+        if (in_array('0.0.0.0/0', $whitelist) && app()->environment('local')) {
+            return true;
+        }
+
+        if (!app()->environment('local')) {
+            $whitelist = array_filter($whitelist, fn($ip) => $ip !== '0.0.0.0/0');
+        }
+
         foreach ($whitelist as $whitelistedIp) {
             if (str_contains($whitelistedIp, '/')) {
                 if ($this->ipInRange($ip, $whitelistedIp)) {
@@ -92,45 +104,6 @@ class ProxyCheckMiddleware
         }
 
         return false;
-    }
-
-    private function isLocalhost(string $ip): bool
-    {
-        return in_array($ip, ['127.0.0.1', '::1', 'localhost'], true);
-    }
-
-    private function ipInRange(string $ip, string $cidr): bool
-    {
-        [$subnet, $mask] = explode('/', $cidr);
-
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            return (ip2long($ip) & ~((1 << (32 - $mask)) - 1)) === ip2long($subnet);
-        }
-
-        return false;
-    }
-
-    private function parseOptions(array $options): array
-    {
-        $config = [
-            'block_proxies' => false,
-            'block_vpns' => false,
-            'block_high_risk' => false,
-            'risk_threshold' => config('security.default_risk_threshold', 75),
-            'log_only' => false
-        ];
-
-        foreach ($options as $option) {
-            match ($option) {
-                'block-proxies' => $config['block_proxies'] = true,
-                'block-vpns' => $config['block_vpns'] = true,
-                'block-high-risk' => $config['block_high_risk'] = true,
-                'log-only' => $config['log_only'] = true,
-                default => $this->parseRiskThreshold($option, $config)
-            };
-        }
-
-        return $config;
     }
 
     private function parseRiskThreshold(string $option, array &$config): void
