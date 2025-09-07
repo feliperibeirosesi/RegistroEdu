@@ -1,29 +1,44 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\AuthController;
 
-Route::middleware(['web', 'proxy.check:block-high-risk,risk-85'])->group(function () {
-    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::middleware(['web', 'proxy.check:block-proxies,block-vpns,block-high-risk,risk-80'])->group(function () {
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
+         ->name('auth.google.redirect');
 });
 
 Route::middleware(['web', 'proxy.check:block-high-risk,risk-75'])->group(function () {
-    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])
+         ->name('auth.google.callback');
 });
 
 Route::middleware(['web', 'proxy.check:log-only'])->group(function () {
-    Route::post('auth/refresh', [AuthController::class, 'refresh']);
+    Route::post('auth/refresh', [AuthController::class, 'refresh'])
+         ->name('auth.refresh');
 });
 
 Route::middleware(['jwt.auth'])->group(function () {
-    Route::get('auth/me', [AuthController::class, 'me']);
-    Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::get('auth/me', [AuthController::class, 'me'])
+         ->name('auth.me');
+
+    Route::post('auth/logout', [AuthController::class, 'logout'])
+         ->name('auth.logout');
+
+    Route::post('auth/revoke-all', [AuthController::class, 'revokeAllSessions'])
+         ->name('auth.revoke-all');
 });
 
-Route::get('/{any}', function () {
-    return view('react');
-})->where('any', '.*');
+Route::middleware(['throttle:60,1'])->get('health', function () {
+    return response()->json([
+        'ping' => 'pong',
+        'timestamp' => now()->toISOString()
+    ]);
+});
 
+Route::middleware(['web', 'proxy.check:log-only'])->group(function () {
+    Route::get('/{any}', function () {
+        return view('react');
+    })->where('any', '.*')->name('spa.catchall');
+});

@@ -7,8 +7,8 @@ use App\Services\ProxyCheckService;
 use App\Utils\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Psr\Log\LogLevel;
 
 class AuthController extends Controller
 {
@@ -26,14 +26,29 @@ class AuthController extends Controller
         $refreshToken = $request->input('refresh_token') ?: $request->cookie('refresh_token');
 
         if (!$refreshToken) {
-            return Tools::res('Refresh token não fornecido', 400);
+            Tools::logAuthEvent(LogLevel::WARNING, "Refresh token not provided",
+                Tools::getIpContext()
+            );
+
+            return Tools::error('Refresh token não fornecido', 400);
         }
 
         try {
             $tokenData = $this->jwtService->refreshAccessToken($refreshToken);
-            return Tools::res('Token renovado com sucesso', 200, $tokenData);
+
+            Tools::logAuthEvent(LogLevel::INFO, "Token refreshed successfully",
+                Tools::getUserContext($tokenData['user']->id)
+            );
+
+            return Tools::tokenResponse('Token renovado com sucesso', $tokenData);
+
         } catch (\Exception $e) {
-            return Tools::res($e->getMessage(), 401);
+            Tools::logAuthEvent(LogLevel::WARNING, "Token refresh failed", [
+                'error' => $e->getMessage(),
+                'ip_context' => Tools::getIpContext()
+            ]);
+
+            return Tools::error($e->getMessage(), 401);
         }
     }
 
@@ -42,7 +57,11 @@ class AuthController extends Controller
         $user = $request->user();
         $payload = $request->get('jwt_payload', []);
 
-        return Tools::res('Dados do usuário', 200, [
+        Tools::logAuthEvent(LogLevel::DEBUG, "User profile accessed",
+            Tools::getUserContext($user->id)
+        );
+
+        return Tools::success('Dados do usuário', [
             'user' => $user,
             'token_info' => [
                 'issued_at' => $payload['iat'] ?? null,
@@ -52,6 +71,59 @@ class AuthController extends Controller
         ]);
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        $refreshToken = $request->input('refresh_token') ?: $request->cookie('refresh_token');
+
+        try {
+            if ($refreshToken) {
+                $this->jwtService->revokeRefreshToken($refreshToken);
+            }
+
+            Tools::logAuthEvent(LogLevel::INFO, "User logged out",
+                Tools::getUserContext($user->id)
+            );
+
+            return Tools::success('Logout realizado com sucesso')
+                ->cookie('access_token', '', -1)
+                ->cookie('refresh_token', '', -1);
+
+        } catch (\Exception $e) {
+            Tools::logAuthEvent(LogLevel::ERROR, "Logout error", [
+                'error' => $e->getMessage(),
+                'user_context' => Tools::getUserContext($user->id)
+            ]);
+
+            return Tools::error('Erro no logout', 500);
+        }
+    }
+
+    public function revokeAllSessions(Request $request)
+    {
+        $user = $request->user();
+
+        try {
+            $this->jwtService->revokeAllUserTokens($user->id);
+
+            Tools::logAuthEvent(LogLevel::WARNING, "All user sessions revoked",
+                Tools::getUserContext($user->id)
+            );
+
+            return Tools::success('Todas as sessões foram revogadas')
+                ->cookie('access_token', '', -1)
+                ->cookie('refresh_token', '', -1);
+
+        } catch (\Exception $e) {
+            Tools::logAuthEvent(LogLevel::ERROR, "Failed to revoke all sessions", [
+                'error' => $e->getMessage(),
+                'user_context' => Tools::getUserContext($user->id)
+            ]);
+
+            return Tools::error('Erro ao revogar sessões', 500);
+        }
+    }
+
     private function generateTokenResponse(\App\Models\User $user, Request $request)
     {
         $accessToken = $this->jwtService->generateAccessToken($user);
@@ -59,8 +131,8 @@ class AuthController extends Controller
 
         $user->update([
             'last_login_at' => now(),
-            'last_login_ip' => $request->get('real_ip', $request->ip()),
-            'ip_info' => $request->get('ip_info', [])
+            'last_login_ip' => Tools::getRealIp(),
+            'ip_info' => $request->get('security_info.ip_info', [])
         ]);
 
         $tokenData = [
@@ -71,8 +143,53 @@ class AuthController extends Controller
             'user' => $user
         ];
 
-        return Tools::res('Login realizado com sucesso', 200, $tokenData)
-            ->cookie('access_token', $accessToken, config('jwt.access_ttl', 60))
-            ->cookie('refresh_token', $refreshToken, config('jwt.refresh_ttl', 20160), null, null, true, true);
+        Tools::logAuthEvent(LogLevel::INFO, "Token generated for user",
+            Tools::getUserContext($user->id)
+        );
+
+        return Tools::tokenResponse('Login realizado com sucesso', $tokenData);
+    }
+
+    private function validateLoginSecurity(Request $request, string $email): bool
+    {
+        $ip = Tools::getRealIp();
+        $ipInfo = $request->get('security_info.ip_info', $this->proxyCheck->checkIp($ip));
+
+        $securityConfig = [
+            'block_proxies' => config('security.login.block_proxies', false),
+            'block_vpns' => config('security.login.block_vpns', false),
+            'block_high_risk' => config('security.login.block_high_risk', true),
+            'risk_threshold' => config('security.login.risk_threshold', 85)
+        ];
+
+        $shouldBlock = false;
+        $reasons = [];
+
+        if ($securityConfig['block_proxies'] && ($ipInfo['is_proxy'] ?? false)) {
+            $shouldBlock = true;
+            $reasons[] = 'proxy_detected';
+        }
+
+        if ($securityConfig['block_vpns'] && ($ipInfo['is_vpn'] ?? false)) {
+            $shouldBlock = true;
+            $reasons[] = 'vpn_detected';
+        }
+
+        if ($securityConfig['block_high_risk'] &&
+            ($ipInfo['risk_score'] ?? 0) >= $securityConfig['risk_threshold']) {
+            $shouldBlock = true;
+            $reasons[] = 'high_risk_score';
+        }
+
+        if ($shouldBlock) {
+            Tools::logSecurityEvent(LogLevel::WARNING, "Login blocked by security policy", [
+                'email' => $email,
+                'block_reasons' => $reasons,
+                'ip_context' => Tools::getIpContext($ipInfo),
+                'security_config' => $securityConfig
+            ]);
+        }
+
+        return !$shouldBlock;
     }
 }

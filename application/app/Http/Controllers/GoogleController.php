@@ -3,19 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use App\Utils\Tools;
 use App\Models\User;
 use App\Services\JWTService;
 use App\Services\ProxyCheckService;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Psr\Log\LogLevel;
 
 class GoogleController extends Controller
 {
     private array $allowedDomains = [];
-
     private JWTService $jwtService;
     private ProxyCheckService $proxyCheck;
 
@@ -24,20 +22,17 @@ class GoogleController extends Controller
         $this->jwtService = $jwtService;
         $this->proxyCheck = $proxyCheck;
 
-        if (app()->environment('local', 'testing')) {
-            $this->allowedDomains = [
-                'gmail.com',
-            ];
-        } else {
-            $this->allowedDomains = [
-                'professor.educacao.sp.gov.br',
-                'educacao.sp.gov.br',
-            ];
-        }
+        $this->allowedDomains = app()->environment('local', 'testing')
+            ? ['gmail.com']
+            : ['professor.educacao.sp.gov.br', 'educacao.sp.gov.br'];
     }
 
     public function redirectToGoogle()
     {
+        Tools::logAuthEvent(LogLevel::DEBUG, "Google OAuth redirect initiated", [
+            'redirect_url' => config('services.google.redirect')
+        ]);
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -46,45 +41,31 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             $email = $googleUser->getEmail();
+            $ip = Tools::getRealIp();
+            $ipInfo = $request->get('security_info.ip_info', $this->proxyCheck->checkIp($ip));
 
-            $ip = $request->get('real_ip', $request->ip());
-            $ipInfo = $request->get('ip_info', $this->proxyCheck->checkIp($ip));
-
-            Log::channel('oauth')->info('Google OAuth attempt', [
+            Tools::logAuthEvent(LogLevel::INFO, "Google OAuth callback received", [
                 'email' => $email,
-                'ip' => $ip,
-                'country' => $ipInfo['country'] ?? 'Unknown',
-                'risk_score' => $ipInfo['risk_score'] ?? 0,
-                'is_proxy' => $ipInfo['is_proxy'] ?? false,
-                'is_vpn' => $ipInfo['is_vpn'] ?? false,
-                'environment' => app()->environment(),
-                'allowed_domains' => $this->allowedDomains,
+                'domain' => $this->extractDomain($email),
+                'ip_context' => Tools::getIpContext($ipInfo),
+                'environment' => app()->environment()
             ]);
 
             if ($this->shouldBlockOAuthLogin($ipInfo, $email)) {
-                Log::channel('security')->warning('OAuth login blocked', [
-                    'email' => $email,
-                    'ip' => $ip,
-                    'reason' => 'High risk IP or suspicious activity',
-                    'is_proxy' => $ipInfo['is_proxy'] ?? false,
-                    'is_vpn' => $ipInfo['is_vpn'] ?? false,
-                    'domain_allowed' => $this->isAllowedDomain($email),
-                ]);
+                Tools::logLoginAttempt(false, $email, $ipInfo, 'Security policy violation');
 
-                return redirect(config('app.frontend_url', '/') . '/login');
+                return $this->handleBlockedLogin($request, $email, $ip, $ipInfo);
             }
 
             $user = $this->findOrCreateUser($googleUser, $ip, $ipInfo);
 
-            $accessToken = $this->jwtService->generateAccessToken($user);
-            $refreshToken = $this->jwtService->generateRefreshToken($user);
-
-            Log::channel('oauth')->info('Google OAuth successful', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'ip' => $ip,
-                'country' => $ipInfo['country'] ?? 'Unknown'
-            ]);
+            $tokenData = [
+                'access_token' => $this->jwtService->generateAccessToken($user),
+                'refresh_token' => $this->jwtService->generateRefreshToken($user),
+                'token_type' => 'Bearer',
+                'expires_in' => config('jwt.access_ttl', 60) * 60,
+                'user' => $user
+            ];
 
             $user->update([
                 'last_login_at' => now(),
@@ -92,49 +73,85 @@ class GoogleController extends Controller
                 'ip_info' => $ipInfo
             ]);
 
+            Tools::logLoginAttempt(true, $email, $ipInfo);
+
             if ($request->expectsJson() || $request->wantsJson()) {
-                return Tools::res('Login realizado com sucesso', 200, [
-                    'access_token' => $accessToken,
-                    'refresh_token' => $refreshToken,
-                    'token_type' => 'Bearer',
-                    'expires_in' => config('jwt.access_ttl', 60) * 60,
-                    'user' => $user
-                ]);
+                return Tools::tokenResponse('Login realizado com sucesso', $tokenData);
             }
 
-            $frontendUrl = config('app.frontend_url', '/');
-            return redirect($frontendUrl . '/auth/callback?token=' . $accessToken)
-                ->cookie('access_token', $accessToken, config('jwt.access_ttl', 60))
-                ->cookie('refresh_token', $refreshToken, config('jwt.refresh_ttl', 20160), null, null, true, true);
+            return $this->handleWebRedirect($tokenData);
 
         } catch (\Exception $e) {
-            Log::channel('system_errors')->error('Google OAuth error', [
+            Tools::logAuthEvent(LogLevel::ERROR, "Google OAuth error", [
                 'error' => $e->getMessage(),
-                'ip' => $request->get('real_ip', $request->ip()),
+                'ip_context' => Tools::getIpContext(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            if ($request->expectsJson()) {
-                return Tools::res('Erro no login com Google', 500);
-            }
-
-            return redirect(config('app.frontend_url', '/') . '/login');
+            return $this->handleError($request, $e);
         }
+    }
+
+    private function extractDomain(string $email): string
+    {
+        return substr(strrchr($email, "@"), 1);
     }
 
     private function isAllowedDomain(string $email): bool
     {
-        $domain = substr(strrchr($email, "@"), 1);
-        return in_array($domain, $this->allowedDomains);
+        return in_array($this->extractDomain($email), $this->allowedDomains);
     }
 
     private function shouldBlockOAuthLogin(array $ipInfo, string $email): bool
     {
-        return (
-            ($ipInfo['is_proxy'] ?? false) ||
-            ($ipInfo['is_vpn'] ?? false) ||
-            ! $this->isAllowedDomain($email)
-        );
+        $reasons = [];
+
+        if ($ipInfo['is_proxy'] ?? false) {
+            $reasons[] = 'proxy_detected';
+        }
+
+        if ($ipInfo['is_vpn'] ?? false) {
+            $reasons[] = 'vpn_detected';
+        }
+
+        if (!$this->isAllowedDomain($email)) {
+            $reasons[] = 'domain_not_allowed';
+        }
+
+        if (!empty($reasons)) {
+            Tools::logSecurityEvent(LogLevel::WARNING, "OAuth login blocked", [
+                'email' => $email,
+                'block_reasons' => $reasons,
+                'ip_context' => Tools::getIpContext($ipInfo)
+            ]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function handleBlockedLogin(Request $request, string $email, string $ip, array $ipInfo)
+    {
+        $reasons = [];
+
+        if ($ipInfo['is_proxy'] ?? false) {
+            $reasons[] = 'Proxy server detected';
+        }
+
+        if ($ipInfo['is_vpn'] ?? false) {
+            $reasons[] = 'VPN service detected';
+        }
+
+        if (!$this->isAllowedDomain($email)) {
+            $reasons[] = 'Email domain not authorized';
+        }
+
+        if ($request->expectsJson()) {
+            return Tools::securityBlockResponse($reasons, $ipInfo);
+        }
+
+        return redirect(config('app.frontend_url', '/') . '/login?error=blocked');
     }
 
     private function findOrCreateUser($googleUser, string $ip, array $ipInfo): User
@@ -153,8 +170,30 @@ class GoogleController extends Controller
                 'ip_info' => $ipInfo,
                 'password' => bcrypt(Str::random(32))
             ]);
+
+            Tools::logAuthEvent(LogLevel::INFO, "New user created via Google OAuth",
+                Tools::getUserContext($user->id)
+            );
         }
 
         return $user;
+    }
+
+    private function handleWebRedirect(array $tokenData)
+    {
+        return redirect('http://localhost:8000/singin')
+            ->cookie('access_token', $tokenData['access_token'], config('jwt.access_ttl', 60))
+            ->cookie('refresh_token', $tokenData['refresh_token'], config('jwt.refresh_ttl', 20160), null, null, true, true);
+    }
+
+    private function handleError(Request $request, \Exception $e)
+    {
+        if ($request->expectsJson()) {
+            return Tools::error('Erro no login com Google', 500, [
+                'code' => 'OAUTH_ERROR'
+            ]);
+        }
+
+        return redirect(config('app.frontend_url', '/') . '/login?error=oauth');
     }
 }

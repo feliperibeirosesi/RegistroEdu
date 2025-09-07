@@ -1,94 +1,114 @@
 <?php
 
 return [
-    'default' => env('LOG_CHANNEL', 'stack'),
-
-    'deprecations' => [
-        'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
-        'trace' => false,
+    'ip_whitelist' => [
     ],
 
-    'channels' => [
-        'stack' => [
-            'driver' => 'stack',
-            'channels' => ['single'],
-            'ignore_exceptions' => false,
-        ],
+    'default_risk_threshold' => env('SECURITY_RISK_THRESHOLD', 75),
 
-        'single' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'replace_placeholders' => true,
-        ],
+    'log_all_checks' => env('SECURITY_LOG_ALL_CHECKS', true),
 
-        // ADICIONE ESTE CANAL SECURITY
-        'security' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/security.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 14,
-            'permission' => 0664,
-            'replace_placeholders' => true,
-        ],
+    'login' => [
+        'block_proxies' => env('SECURITY_LOGIN_BLOCK_PROXIES', false),
+        'block_vpns' => env('SECURITY_LOGIN_BLOCK_VPNS', false),
+        'block_high_risk' => env('SECURITY_LOGIN_BLOCK_HIGH_RISK', true),
+        'risk_threshold' => env('SECURITY_LOGIN_RISK_THRESHOLD', 85),
+        'max_attempts_per_ip' => env('SECURITY_MAX_LOGIN_ATTEMPTS', 10),
+        'lockout_duration' => env('SECURITY_LOCKOUT_DURATION', 300),
+    ],
 
-        'daily' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 14,
-            'replace_placeholders' => true,
-        ],
+    'oauth' => [
+        'block_proxies' => env('SECURITY_OAUTH_BLOCK_PROXIES', true),
+        'block_vpns' => env('SECURITY_OAUTH_BLOCK_VPNS', true),
+        'block_high_risk' => env('SECURITY_OAUTH_BLOCK_HIGH_RISK', true),
+        'risk_threshold' => env('SECURITY_OAUTH_RISK_THRESHOLD', 70),
 
-        'slack' => [
-            'driver' => 'slack',
-            'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => 'Laravel Log',
-            'emoji' => ':boom:',
-            'level' => env('LOG_LEVEL', 'critical'),
-            'replace_placeholders' => true,
-        ],
-
-        'papertrail' => [
-            'driver' => 'syslog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'facility' => LOG_USER,
-            'replace_placeholders' => true,
-        ],
-
-        'stderr' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => Monolog\Handler\StreamHandler::class,
-            'formatter' => env('LOG_STDERR_FORMATTER'),
-            'with' => [
-                'stream' => 'php://stderr',
+        'allowed_domains' => [
+            'production' => [
+                'professor.educacao.sp.gov.br',
+                'educacao.sp.gov.br',
             ],
-            'processors' => [
-                Monolog\Processor\PsrLogMessageProcessor::class,
-            ],
+            'development' => [
+                'gmail.com',
+                'teste.com',
+            ]
+        ]
+    ],
+
+    'api' => [
+        'block_proxies' => env('SECURITY_API_BLOCK_PROXIES', false),
+        'block_vpns' => env('SECURITY_API_BLOCK_VPNS', false),
+        'block_high_risk' => env('SECURITY_API_BLOCK_HIGH_RISK', true),
+        'risk_threshold' => env('SECURITY_API_RISK_THRESHOLD', 90),
+        'rate_limit_strict' => env('SECURITY_API_RATE_LIMIT_STRICT', true),
+    ],
+
+    'cache' => [
+        'ip_check_ttl' => env('SECURITY_CACHE_IP_TTL', 7200),
+        'security_result_ttl' => env('SECURITY_CACHE_RESULT_TTL', 86400),
+        'use_database_fallback' => env('SECURITY_USE_DB_FALLBACK', true),
+    ],
+
+    'development' => [
+        'bypass_localhost' => env('SECURITY_DEV_BYPASS_LOCALHOST', true),
+        'log_level' => env('SECURITY_DEV_LOG_LEVEL', 'debug'),
+        'fake_high_risk_ips' => env('SECURITY_DEV_FAKE_HIGH_RISK', [
+        ]),
+    ],
+
+    'notifications' => [
+        'enable_security_alerts' => env('SECURITY_ENABLE_ALERTS', true),
+        'alert_threshold' => env('SECURITY_ALERT_THRESHOLD', 95),
+        'admin_emails' => [
+            env('SECURITY_ADMIN_EMAIL', 'admin@empresa.com'),
+        ],
+        'slack_webhook' => env('SECURITY_SLACK_WEBHOOK'),
+    ],
+
+    'trusted_ip_headers' => [
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_FORWARDED',
+        'HTTP_X_CLUSTER_CLIENT_IP',
+        'HTTP_CLIENT_IP',
+        'REMOTE_ADDR'
+    ],
+
+    'advanced_blocking' => [
+        'enable_geo_blocking' => env('SECURITY_GEO_BLOCKING', false),
+        'blocked_countries' => [
+        ],
+        'allowed_countries' => [
+            'BR',
         ],
 
-        'syslog' => [
-            'driver' => 'syslog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'facility' => LOG_USER,
-            'replace_placeholders' => true,
-        ],
-
-        'errorlog' => [
-            'driver' => 'errorlog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'replace_placeholders' => true,
-        ],
-
-        'null' => [
-            'driver' => 'monolog',
-            'handler' => Monolog\Handler\NullHandler::class,
-        ],
-
-        'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+        'enable_asn_blocking' => env('SECURITY_ASN_BLOCKING', false),
+        'blocked_asns' => [
         ],
     ],
+
+    'risk_based_limiting' => [
+        'enable' => env('SECURITY_RISK_BASED_LIMITING', true),
+        'low_risk_limit' => env('SECURITY_LOW_RISK_LIMIT', 1000),
+        'medium_risk_limit' => env('SECURITY_MEDIUM_RISK_LIMIT', 100),
+        'high_risk_limit' => env('SECURITY_HIGH_RISK_LIMIT', 10),
+
+        'risk_thresholds' => [
+            'low' => 25,
+            'medium' => 60,
+            'high' => 85,
+        ]
+    ],
+
+    'honeypot' => [
+        'enable' => env('SECURITY_HONEYPOT_ENABLE', false),
+        'endpoints' => [
+            '/admin',
+            '/wp-admin',
+            '/phpmyadmin',
+            '/.env'
+        ],
+        'ban_duration' => env('SECURITY_HONEYPOT_BAN_DURATION', 3600),
+    ]
 ];
