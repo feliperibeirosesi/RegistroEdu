@@ -49,7 +49,7 @@ class GoogleController extends Controller
         ]);
 
         return Socialite::driver('google')
-            ->stateless(false)
+            ->stateless()
             ->with(['state' => $state])
             ->redirect();
     }

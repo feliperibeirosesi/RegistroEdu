@@ -17,6 +17,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'google_id',
         'avatar',
         'password',
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
         'ip_info' => 'array',
+        'role' => 'string',
     ];
 
     protected $hidden = [
@@ -75,6 +77,46 @@ class User extends Authenticatable
         $this->attributes['avatar'] = $value ?: 'default-avatar.png';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return in_array($this->role, $roles);
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeModerators($query)
+    {
+        return $query->where('role', 'moderator');
+    }
+
+    public function scopeUsers($query)
+    {
+        return $query->where('role', 'user');
+    }
+
+    public function scopeByRole($query, string $role)
+    {
+        return $query->where('role', $role);
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -82,6 +124,10 @@ class User extends Authenticatable
         static::creating(function ($model) {
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+
+            if (empty($model->role)) {
+                $model->role = 'user';
             }
         });
     }

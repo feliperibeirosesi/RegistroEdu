@@ -270,4 +270,119 @@ class ProxyCheckMiddleware
 
         return $dbResult ? $dbResult->security_data : null;
     }
+
+    private function parseOptions(array $options): array
+    {
+        $config = [
+            'block_proxies' => config('security.block_proxies', false),
+            'block_vpns' => config('security.block_vpns', false),
+            'block_high_risk' => config('security.block_high_risk', false),
+            'risk_threshold' => config('security.risk_threshold', 75),
+            'log_only' => config('security.log_only', false),
+        ];
+
+        foreach ($options as $option) {
+            switch ($option) {
+                case 'block-proxies':
+                    $config['block_proxies'] = true;
+                    break;
+                case 'block-vpns':
+                    $config['block_vpns'] = true;
+                    break;
+                case 'block-high-risk':
+                    $config['block_high_risk'] = true;
+                    break;
+                case 'log-only':
+                    $config['log_only'] = true;
+                    break;
+                default:
+                    $this->parseRiskThreshold($option, $config);
+                    break;
+            }
+        }
+        return $config;
+    }
+
+    private function isLocalhost(string $ip): bool
+    {
+        $localhostIps = [
+            '127.0.0.1',
+            '::1',
+            'localhost',
+            '0.0.0.0'
+        ];
+
+        if (in_array($ip, $localhostIps)) {
+            return true;
+        }
+
+        $localhostRanges = [
+            '127.0.0.0/8',
+            '::1/128',
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+        ];
+
+        foreach ($localhostRanges as $range) {
+            if ($this->ipInRange($ip, $range)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function ipInRange(string $ip, string $range): bool
+    {
+        if (!str_contains($range, '/')) {
+            return false;
+        }
+
+        [$subnet, $bits] = explode('/', $range);
+
+        if (str_contains($ip, ':') || str_contains($subnet, ':')) {
+            return $this->ipv6InRange($ip, $subnet, (int) $bits);
+        }
+
+        $ip = ip2long($ip);
+        $subnet = ip2long($subnet);
+
+        if ($ip === false || $subnet === false) {
+            return false;
+        }
+
+        $mask = -1 << (32 - (int) $bits);
+        $subnet &= $mask;
+
+        return ($ip & $mask) === $subnet;
+    }
+
+    private function ipv6InRange(string $ip, string $subnet, int $bits): bool
+    {
+        $ipBinary = inet_pton($ip);
+        $subnetBinary = inet_pton($subnet);
+
+        if ($ipBinary === false || $subnetBinary === false) {
+            return false;
+        }
+
+        $bytesToCheck = intval($bits / 8);
+        $bitsToCheck = $bits % 8;
+
+        for ($i = 0; $i < $bytesToCheck; $i++) {
+            if ($ipBinary[$i] !== $subnetBinary[$i]) {
+                return false;
+            }
+        }
+
+        if ($bitsToCheck > 0 && $bytesToCheck < 16) {
+            $mask = 0xFF << (8 - $bitsToCheck);
+            if ((ord($ipBinary[$bytesToCheck]) & $mask) !== (ord($subnetBinary[$bytesToCheck]) & $mask)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
