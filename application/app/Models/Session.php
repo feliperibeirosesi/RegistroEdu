@@ -13,6 +13,14 @@ class Session extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
+    protected $fillable = [
+        'user_id',
+        'ip_address',
+        'user_agent',
+        'payload',
+        'last_activity'
+    ];
+
     protected static function boot()
     {
         parent::boot();

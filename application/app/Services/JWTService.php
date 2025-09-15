@@ -8,6 +8,9 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Illuminate\Support\Facades\Cache;
 use App\Models\User;
+use App\Models\RefreshToken;
+use App\Utils\Tools;
+use Illuminate\Support\Facades\DB;
 
 class JWTService
 {
@@ -31,7 +34,7 @@ class JWTService
             'sub' => $user->id,
             'iat' => time(),
             'exp' => time() + ($this->accessTokenTTL * 60),
-            'jti' => uniqid(),
+            'jti' => uniqid('acc_', true),
             'user_id' => $user->id,
             'email' => $user->email,
             'name' => $user->name,
@@ -43,18 +46,33 @@ class JWTService
 
     public function generateRefreshToken(User $user): string
     {
+        $jti = uniqid('ref_', true);
+        $expiresAt = now()->addMinutes($this->refreshTokenTTL);
+
         $payload = [
             'iss' => config('app.name'),
             'sub' => $user->id,
             'iat' => time(),
-            'exp' => time() + ($this->refreshTokenTTL * 60),
-            'jti' => uniqid(),
+            'exp' => $expiresAt->timestamp,
+            'jti' => $jti,
             'type' => 'refresh'
         ];
 
         $token = JWT::encode($payload, $this->secretKey, $this->algorithm);
 
-        Cache::put("refresh_token:{$user->id}:{$payload['jti']}", true, $this->refreshTokenTTL);
+        RefreshToken::create([
+            'user_id' => $user->id,
+            'jti' => $jti,
+            'expires_at' => $expiresAt,
+            'ip_address' => Tools::getRealIp(),
+            'user_agent' => request()->userAgent()
+        ]);
+
+        Cache::put(
+            "refresh_token:{$user->id}:{$jti}",
+            true,
+            $this->refreshTokenTTL * 60
+        );
 
         return $token;
     }
@@ -81,9 +99,10 @@ class JWTService
             throw new \Exception('Invalid refresh token', 401);
         }
 
-        $cacheKey = "refresh_token:{$payload['sub']}:{$payload['jti']}";
-        if (!Cache::has($cacheKey)) {
-            throw new \Exception('Refresh token revoked', 401);
+        $tokenRecord = RefreshToken::findByJti($payload['jti']);
+
+        if (!$tokenRecord || !$tokenRecord->isValid()) {
+            throw new \Exception('Refresh token revoked or expired', 401);
         }
 
         $user = User::find($payload['sub']);
@@ -91,10 +110,13 @@ class JWTService
             throw new \Exception('User not found', 404);
         }
 
+        $tokenRecord->markAsUsed();
+
         $newAccessToken = $this->generateAccessToken($user);
         $newRefreshToken = $this->generateRefreshToken($user);
 
-        Cache::forget($cacheKey);
+        $tokenRecord->revoke();
+        Cache::forget("refresh_token:{$user->id}:{$payload['jti']}");
 
         return [
             'access_token' => $newAccessToken,
@@ -109,20 +131,78 @@ class JWTService
     {
         try {
             $payload = $this->validateToken($refreshToken);
-            $cacheKey = "refresh_token:{$payload['sub']}:{$payload['jti']}";
-            Cache::forget($cacheKey);
+
+            $tokenRecord = RefreshToken::findByJti($payload['jti']);
+            if ($tokenRecord) {
+                $tokenRecord->revoke();
+            }
+
+            Cache::forget("refresh_token:{$payload['sub']}:{$payload['jti']}");
         } catch (\Exception $e) {
-            // Token já inválido
+            // Token já inválido, não precisa fazer nada
         }
     }
 
-    public function revokeAllUserTokens(int $userId): void
+    public function revokeAllUserTokens(string $userId): void
+    {
+        try {
+            DB::transaction(function () use ($userId) {
+                $count = RefreshToken::revokeAllForUser($userId);
+
+                $this->clearUserTokenCache($userId);
+
+                Tools::logAuthEvent('info', "Revoked {$count} refresh tokens for user", [
+                    'user_id' => $userId
+                ]);
+            });
+        } catch (\Exception $e) {
+            Tools::logAuthEvent('error', 'Failed to revoke user tokens', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    private function clearUserTokenCache(string $userId): void
     {
         $pattern = "refresh_token:{$userId}:*";
-        $keys = Cache::getRedis()->keys($pattern);
 
-        if (!empty($keys)) {
-            Cache::getRedis()->del($keys);
+        try {
+            $redis = Cache::getRedis();
+            $keys = $redis->keys($pattern);
+
+            if (!empty($keys)) {
+                $redis->del($keys);
+            }
+        } catch (\Exception $e) {
+            Tools::logAuthEvent('warning', 'Failed to clear token cache', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
         }
+    }
+
+    public function getUserActiveSessions(string $userId): array
+    {
+        return RefreshToken::forUser($userId)
+            ->valid()
+            ->orderBy('last_used_at', 'desc')
+            ->get()
+            ->map(function ($token) {
+                return [
+                    'id' => $token->id,
+                    'ip_address' => $token->ip_address,
+                    'user_agent' => $token->user_agent,
+                    'created_at' => $token->created_at,
+                    'last_used_at' => $token->last_used_at,
+                    'expires_at' => $token->expires_at
+                ];
+            })->toArray();
+    }
+
+    public function cleanupExpiredTokens(): int
+    {
+        return RefreshToken::cleanupExpired();
     }
 }

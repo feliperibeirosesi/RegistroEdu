@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HealthController;
+
+Route::get('/health', [HealthController::class, 'basic'])->name('health.basic');
+Route::get('/health/detailed', [HealthController::class, 'detailed'])->name('health.detailed');
 
 Route::middleware(['web', 'proxy.check:block-proxies,block-vpns,block-high-risk,risk-80'])->group(function () {
     Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
@@ -32,7 +36,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
 Route::middleware(['throttle:60,1'])->get('health', function () {
     return response()->json([
-        'ping' => 'pong',
+        'res' => 'pong',
         'timestamp' => now()->toISOString()
     ]);
 });

@@ -27,49 +27,70 @@ class GoogleController extends Controller
             : ['professor.educacao.sp.gov.br', 'educacao.sp.gov.br'];
     }
 
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
+        if (!$this->validateOrigin($request)) {
+            Tools::logAuthEvent(LogLevel::WARNING, "OAuth redirect blocked - Invalid origin", [
+                'origin' => $request->header('Origin'),
+                'referer' => $request->header('Referer'),
+                'ip_context' => Tools::getIpContext()
+            ]);
+
+            return Tools::error('Invalid request origin', 403);
+        }
+
+        $state = Str::random(40);
+        session(['oauth_state' => $state]);
+
         Tools::logAuthEvent(LogLevel::DEBUG, "Google OAuth redirect initiated", [
-            'redirect_url' => config('services.google.redirect')
+            'redirect_url' => config('services.google.redirect'),
+            'state_generated' => true,
+            'origin' => $request->header('Origin')
         ]);
 
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->stateless()
+            ->with(['state' => $state])
+            ->redirect();
     }
 
     public function handleGoogleCallback(Request $request)
     {
         try {
+            if (!$this->validateOAuthState($request)) {
+                Tools::logAuthEvent(LogLevel::WARNING, "OAuth callback blocked - Invalid state", [
+                    'received_state' => $request->get('state'),
+                    'ip_context' => Tools::getIpContext()
+                ]);
+
+                return $this->handleError($request, new \Exception('Invalid state parameter - possible CSRF attack'));
+            }
+
+            if (!$this->validateOrigin($request)) {
+                Tools::logAuthEvent(LogLevel::WARNING, "OAuth callback blocked - Invalid origin", [
+                    'origin' => $request->header('Origin'),
+                    'referer' => $request->header('Referer'),
+                    'ip_context' => Tools::getIpContext()
+                ]);
+
+                return $this->handleError($request, new \Exception('Invalid request origin'));
+            }
+
             $googleUser = Socialite::driver('google')->user();
             $email = $googleUser->getEmail();
             $ip = Tools::getRealIp();
             $ipInfo = $request->get('security_info.ip_info', $this->proxyCheck->checkIp($ip));
 
-<<<<<<< HEAD
-            if (!$email) {
-                return Tools::res(
-                    'E-mail não disponível',
-                    400
-                );
-            }
-
-            if (!$this->isAllowedDomain($email)) {
-                return Tools::res(
-                    'Domínio não autorizado',
-                    403
-                );
-            }
-=======
             Tools::logAuthEvent(LogLevel::INFO, "Google OAuth callback received", [
                 'email' => $email,
                 'domain' => $this->extractDomain($email),
                 'ip_context' => Tools::getIpContext($ipInfo),
-                'environment' => app()->environment()
+                'environment' => app()->environment(),
+                'csrf_validated' => true
             ]);
 
             if ($this->shouldBlockOAuthLogin($ipInfo, $email)) {
                 Tools::logLoginAttempt(false, $email, $ipInfo, 'Security policy violation');
->>>>>>> JoaoPaulo
-
                 return $this->handleBlockedLogin($request, $email, $ip, $ipInfo);
             }
 
@@ -91,6 +112,8 @@ class GoogleController extends Controller
 
             Tools::logLoginAttempt(true, $email, $ipInfo);
 
+            session()->forget('oauth_state');
+
             if ($request->expectsJson() || $request->wantsJson()) {
                 return Tools::tokenResponse('Login realizado com sucesso', $tokenData);
             }
@@ -98,9 +121,8 @@ class GoogleController extends Controller
             return $this->handleWebRedirect($tokenData);
 
         } catch (\Exception $e) {
-<<<<<<< HEAD
-            return Tools::res('Erro no login com Google:' . $e, 500);
-=======
+            session()->forget('oauth_state');
+
             Tools::logAuthEvent(LogLevel::ERROR, "Google OAuth error", [
                 'error' => $e->getMessage(),
                 'ip_context' => Tools::getIpContext(),
@@ -108,8 +130,50 @@ class GoogleController extends Controller
             ]);
 
             return $this->handleError($request, $e);
->>>>>>> JoaoPaulo
         }
+    }
+
+    private function validateOAuthState(Request $request): bool
+    {
+        $receivedState = $request->get('state');
+        $sessionState = session('oauth_state');
+
+        if (!$receivedState || !$sessionState) {
+            return false;
+        }
+
+        return hash_equals($sessionState, $receivedState);
+    }
+
+    private function validateOrigin(Request $request): bool
+    {
+        $allowedOrigins = [
+            config('app.frontend_url'),
+            config('app.url'),
+            'http://localhost:8000',
+        ];
+
+        $origin = $request->header('Origin');
+        $referer = $request->header('Referer');
+
+        if ($origin && in_array($origin, $allowedOrigins)) {
+            return true;
+        }
+
+        if (!$origin && $referer) {
+            $refererDomain = parse_url($referer, PHP_URL_SCHEME) . '://' . parse_url($referer, PHP_URL_HOST);
+            if (parse_url($referer, PHP_URL_PORT)) {
+                $refererDomain .= ':' . parse_url($referer, PHP_URL_PORT);
+            }
+
+            return in_array($refererDomain, $allowedOrigins);
+        }
+
+        if (app()->environment('local', 'testing') && !$origin && !$referer) {
+            return true;
+        }
+
+        return false;
     }
 
     private function extractDomain(string $email): string
