@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useApi } from './hooks/useApi';  // Ajuste o caminho conforme seu projeto
-import { useError } from './contexts/ErrorContext';
+import { useApi } from '../hooks/useApi';  // Ajuste o caminho conforme seu projeto
+import { useError } from '../contexts/ErrorContext';
 
 export default function TesteErro() {
   const { apiRequest } = useApi();
