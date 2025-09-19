@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import SingIn from './pages/SingIn';
 import Teste from './pages/teste';
 import LoggedIn from './pages/LoggedIn'
+import Profile from './pages/Profile'
 const { Header, Sider } = Layout
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
                 <Route path="/singin" element={<SingIn />} />
                 <Route path="/teste" element={<Teste />} />
                 <Route path="/loggedin" element={<LoggedIn />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
 
 

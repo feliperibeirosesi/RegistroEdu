@@ -110,17 +110,6 @@ body.dark .sidebar {
 
 }
 
-.profile {
-  height: 150px;
-  width: 250px;
-  position: absolute;
-  top: 15%;
-  left: 29.5%;
-  border-radius: 30px;
-  background: white;
-  border: 1px solid #d9d9d9;
-}
-
 .div1 {
   height: 150px;
   width: 250px;

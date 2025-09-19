@@ -9,7 +9,7 @@ import { GoMortarBoard } from "react-icons/go";
 import { IoBagOutline } from "react-icons/io5";
 import { LuFilter } from "react-icons/lu";
 import { FiUserPlus } from "react-icons/fi";
-import "../styles/page/index.css"
+import "../styles/page/ProfileCss.css"
 
 
 
@@ -66,11 +66,6 @@ function App() {
             />
           </Header>
           <Layout>
-
-            <div className='div0'>
-              <Button className='profile'></Button>
-            </div>
-
             <div className='div1'>
               <div className='boneco' ><div className='Icons1'>
                 <FaRegUser /></div></div>
