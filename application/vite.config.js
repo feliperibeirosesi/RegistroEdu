@@ -14,11 +14,11 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         cors: {
-            origin: 'http://hangmangame.pro:8000',
+            origin: 'http://localhost:8000',
             credentials: true,
         },
         hmr: {
-            host: 'hangmangame.pro',
+            host: 'localhost',
             port: 5173,
         },
     },
