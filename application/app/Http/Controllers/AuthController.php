@@ -63,7 +63,6 @@ class AuthController extends Controller
 
         return Tools::success('Dados do usuário', [
             'user' => [
-                'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
@@ -71,11 +70,8 @@ class AuthController extends Controller
                 'google_id' => $user->google_id,
                 'provider' => $user->provider,
                 'last_login_at' => $user->last_login_at,
-                'last_login_ip' => $user->last_login_ip,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
-                'is_admin' => $user->isAdmin(),
-                'is_user' => $user->isUser(),
                 'active_sessions_count' => $user->getActiveSessionsCount(),
             ],
             'token_info' => [

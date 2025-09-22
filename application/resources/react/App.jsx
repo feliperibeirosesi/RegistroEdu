@@ -1,8 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
+
 import Home from './pages/Home';
 import SingIn from './pages/SingIn';
 
-export default function App() {
+function App() {
     return (
         <Routes>
             <Route path="/" element={<Home />} />
@@ -10,3 +11,5 @@ export default function App() {
         </Routes>
     );
 }
+
+export default App;

@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwt.auth' => \App\Http\Middleware\JWTAuthMiddleware::class,
             'proxy.check' => \App\Http\Middleware\ProxyCheckMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'user' => \App\Http\Middleware\UserMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

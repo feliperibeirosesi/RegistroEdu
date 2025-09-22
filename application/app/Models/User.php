@@ -26,6 +26,11 @@ class User extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'ip_info',
+        'status',
+        'email_verification_token',
+        'admin_approved_at',
+        'approved_by',
+        'rejection_reason'
     ];
 
     protected $casts = [
@@ -33,12 +38,33 @@ class User extends Authenticatable
         'last_login_at' => 'datetime',
         'ip_info' => 'array',
         'role' => 'string',
+        'admin_approved_at' => 'datetime',
     ];
 
     protected $hidden = [
         'password',
         'remember_token'
     ];
+
+    const STATUS_PENDING_EMAIL = 'pending_email_verification';
+    const STATUS_WAITING_ADMIN = 'waiting_admin_approval';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+
+    public function isEmailVerified(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 
     public function sessions()
     {
@@ -128,6 +154,10 @@ class User extends Authenticatable
 
             if (empty($model->role)) {
                 $model->role = 'user';
+            }
+
+            if (empty($model->status)) {
+                $model->status = self::STATUS_PENDING_EMAIL;
             }
         });
     }

@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/react/Main.jsx'],
             refresh: true,
         }),
         react(),
@@ -14,11 +14,11 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         cors: {
-            origin: 'http://hangmangame.pro:8000',
+            origin: 'http://localhost:8000',
             credentials: true,
         },
         hmr: {
-            host: 'hangmangame.pro',
+            host: 'localhost',
             port: 5173,
         },
     },

@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class RefreshToken extends Model
 {
-    public $timestamps = false; // Usamos apenas created_at customizado
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',
@@ -41,7 +41,6 @@ class RefreshToken extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -62,7 +61,6 @@ class RefreshToken extends Model
         return $query->where('user_id', $userId);
     }
 
-    // Methods
     public function isExpired(): bool
     {
         return $this->expires_at->isPast();

@@ -10,6 +10,7 @@ use App\Services\JWTService;
 use App\Services\ProxyCheckService;
 use Illuminate\Support\Str;
 use Psr\Log\LogLevel;
+use App\Helpers\SecurityEmailHelper;
 
 class GoogleController extends Controller
 {
@@ -35,35 +36,21 @@ class GoogleController extends Controller
                 'referer' => $request->header('Referer'),
                 'ip_context' => Tools::getIpContext()
             ]);
-
             return Tools::error('Invalid request origin', 403);
         }
 
-        $state = Str::random(40);
-        session(['oauth_state' => $state]);
-
-        Tools::logAuthEvent(LogLevel::DEBUG, "Google OAuth redirect initiated", [
-            'redirect_url' => config('services.google.redirect'),
-            'state_generated' => true,
-            'origin' => $request->header('Origin')
-        ]);
-
-        return Socialite::driver('google')
-            ->stateless()
-            ->with(['state' => $state])
-            ->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     public function handleGoogleCallback(Request $request)
     {
         try {
-            if (!$this->validateOAuthState($request)) {
+            if (!app()->environment('local', 'testing') && !$this->validateOAuthState($request)) {
                 Tools::logAuthEvent(LogLevel::WARNING, "OAuth callback blocked - Invalid state", [
                     'received_state' => $request->get('state'),
                     'ip_context' => Tools::getIpContext()
                 ]);
-
-                return $this->handleError($request, new \Exception('Invalid state parameter - possible CSRF attack'));
+                return $this->handleError($request, new \Exception('Invalid state parameter'));
             }
 
             if (!$this->validateOrigin($request)) {
@@ -72,7 +59,6 @@ class GoogleController extends Controller
                     'referer' => $request->header('Referer'),
                     'ip_context' => Tools::getIpContext()
                 ]);
-
                 return $this->handleError($request, new \Exception('Invalid request origin'));
             }
 
@@ -81,21 +67,16 @@ class GoogleController extends Controller
             $ip = Tools::getRealIp();
             $ipInfo = $request->get('security_info.ip_info', $this->proxyCheck->checkIp($ip));
 
-            Tools::logAuthEvent(LogLevel::INFO, "Google OAuth callback received", [
-                'email' => $email,
-                'domain' => $this->extractDomain($email),
-                'ip_context' => Tools::getIpContext($ipInfo),
-                'environment' => app()->environment(),
-                'csrf_validated' => true
-            ]);
-
             if ($this->shouldBlockOAuthLogin($ipInfo, $email)) {
                 Tools::logLoginAttempt(false, $email, $ipInfo, 'Security policy violation');
-
-                return $this->handleBlockedLogin($request, $email, $ip, $ipInfo);
+                return $this->handleBlockedLogin($request, $email, $ipInfo);
             }
 
             $user = $this->findOrCreateUser($googleUser, $ip, $ipInfo);
+
+            if (!$user->isApproved()) {
+                return $this->handleUnapprovedUser($request, $user);
+            }
 
             $tokenData = [
                 'access_token' => $this->jwtService->generateAccessToken($user),
@@ -112,7 +93,6 @@ class GoogleController extends Controller
             ]);
 
             Tools::logLoginAttempt(true, $email, $ipInfo);
-
             session()->forget('oauth_state');
 
             if ($request->expectsJson() || $request->wantsJson()) {
@@ -120,16 +100,13 @@ class GoogleController extends Controller
             }
 
             return $this->handleWebRedirect($tokenData);
-
         } catch (\Exception $e) {
             session()->forget('oauth_state');
-
             Tools::logAuthEvent(LogLevel::ERROR, "Google OAuth error", [
                 'error' => $e->getMessage(),
                 'ip_context' => Tools::getIpContext(),
                 'trace' => $e->getTraceAsString()
             ]);
-
             return $this->handleError($request, $e);
         }
     }
@@ -148,10 +125,13 @@ class GoogleController extends Controller
 
     private function validateOrigin(Request $request): bool
     {
+        if (app()->environment('local', 'testing')) {
+            return true;
+        }
+
         $allowedOrigins = [
-            config('app.frontend_url'),
-            config('app.url'),
-            'http://localhost:8000',
+            'https://professor.educacao.sp.gov.br',
+            'https://educacao.sp.gov.br',
         ];
 
         $origin = $request->header('Origin');
@@ -166,12 +146,7 @@ class GoogleController extends Controller
             if (parse_url($referer, PHP_URL_PORT)) {
                 $refererDomain .= ':' . parse_url($referer, PHP_URL_PORT);
             }
-
             return in_array($refererDomain, $allowedOrigins);
-        }
-
-        if (app()->environment('local', 'testing') && !$origin && !$referer) {
-            return true;
         }
 
         return false;
@@ -209,14 +184,13 @@ class GoogleController extends Controller
                 'block_reasons' => $reasons,
                 'ip_context' => Tools::getIpContext($ipInfo)
             ]);
-
             return true;
         }
 
         return false;
     }
 
-    private function handleBlockedLogin(Request $request, string $email, string $ip, array $ipInfo)
+    private function handleBlockedLogin(Request $request, string $email, array $ipInfo)
     {
         $reasons = [];
 
@@ -253,12 +227,11 @@ class GoogleController extends Controller
                 'last_login_at' => now(),
                 'last_login_ip' => $ip,
                 'ip_info' => $ipInfo,
-                'password' => bcrypt(Str::random(32))
+                'password' => bcrypt(Str::random(32)),
+                'status' => User::STATUS_PENDING_EMAIL,
             ]);
 
-            Tools::logAuthEvent(LogLevel::INFO, "New user created via Google OAuth",
-                Tools::getUserContext($user->id)
-            );
+            SecurityEmailHelper::sendEmailVerification($user);
         }
 
         return $user;
@@ -266,9 +239,30 @@ class GoogleController extends Controller
 
     private function handleWebRedirect(array $tokenData)
     {
-        return redirect('http://localhost:8000/singin')
+        return redirect('http://localhost:8000/singn')
             ->cookie('access_token', $tokenData['access_token'], config('jwt.access_ttl', 60))
             ->cookie('refresh_token', $tokenData['refresh_token'], config('jwt.refresh_ttl', 20160), null, null, true, true);
+    }
+
+    private function handleUnapprovedUser(Request $request, User $user)
+    {
+        $message = match($user->status) {
+            User::STATUS_PENDING_EMAIL => 'Verifique seu email para continuar o processo de registro.',
+            User::STATUS_WAITING_ADMIN => 'Seu registro está sendo analisado. Aguarde a aprovação.',
+            User::STATUS_REJECTED => 'Seu registro foi rejeitado. Entre em contato com o suporte.',
+            default => 'Seu registro está pendente.'
+        };
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'redirect_url' => 'http://localhost:8000/status?error=not_approved&status=' . $user->status,
+                'message' => $message,
+                'code' => 'USER_NOT_APPROVED',
+                'status' => $user->status
+            ], 403);
+        }
+
+        return redirect('http://localhost:8000/status?error=not_approved&status=' . $user->status);
     }
 
     private function handleError(Request $request, \Exception $e)
