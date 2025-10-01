@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 class GenerateJwtSecret extends Command
 {
     protected $signature = 'jwt:secret {--show : Display the key instead of modifying files}';
+
     protected $description = 'Generate a JWT secret key';
 
     public function handle()
@@ -16,6 +17,7 @@ class GenerateJwtSecret extends Command
 
         if ($this->option('show')) {
             $this->line('<comment>'.$key.'</comment>');
+
             return;
         }
 
@@ -28,7 +30,7 @@ class GenerateJwtSecret extends Command
     {
         $currentKey = config('jwt.secret') ?: env('JWT_SECRET');
 
-        if (strlen($currentKey) !== 0 && (!$this->confirmToProceed())) {
+        if (strlen($currentKey) !== 0 && (! $this->confirmToProceed())) {
             return;
         }
 
@@ -53,6 +55,7 @@ class GenerateJwtSecret extends Command
     protected function keyReplacementPattern()
     {
         $escaped = preg_quote('='.config('jwt.secret') ?: env('JWT_SECRET'), '/');
+
         return "/^JWT_SECRET{$escaped}/m";
     }
 }

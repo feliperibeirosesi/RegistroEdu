@@ -3,15 +3,17 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ProxyCheckService
 {
     private Client $client;
+
     private ?string $apiKey;
+
     private string $baseUrl = 'http://proxycheck.io/v2/';
+
     private bool $enabled;
 
     public function __construct()
@@ -23,7 +25,7 @@ class ProxyCheckService
 
     public function checkIp(string $ip): array
     {
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             return $this->getDefaultResponse($ip);
         }
 
@@ -36,7 +38,7 @@ class ProxyCheckService
 
     public function checkMultipleIps(array $ips): array
     {
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             return array_map([$this, 'getDefaultResponse'], $ips);
         }
 
@@ -52,7 +54,7 @@ class ProxyCheckService
             }
         }
 
-        if (!empty($uncachedIps)) {
+        if (! empty($uncachedIps)) {
             $batchResults = $this->performBatchApiCheck($uncachedIps);
 
             foreach ($batchResults as $ip => $result) {
@@ -78,15 +80,15 @@ class ProxyCheckService
                 'port' => 1,
                 'seen' => 1,
                 'days' => 7,
-                'tag' => 'laravel-app'
+                'tag' => 'laravel-app',
             ];
 
             if ($this->apiKey) {
                 $queryParams['key'] = $this->apiKey;
             }
 
-            $response = $this->client->get($this->baseUrl . $ip, [
-                'query' => $queryParams
+            $response = $this->client->get($this->baseUrl.$ip, [
+                'query' => $queryParams,
             ]);
 
             $data = json_decode($response->getBody(), true);
@@ -100,7 +102,7 @@ class ProxyCheckService
         } catch (\Exception $e) {
             Log::warning('ProxyCheck API Error', [
                 'ip' => $ip,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return $this->getDefaultResponse($ip, $e->getMessage());
@@ -116,15 +118,15 @@ class ProxyCheckService
                 'vpn' => 1,
                 'asn' => 1,
                 'risk' => 1,
-                'tag' => 'laravel-batch'
+                'tag' => 'laravel-batch',
             ];
 
             if ($this->apiKey) {
                 $queryParams['key'] = $this->apiKey;
             }
 
-            $response = $this->client->get($this->baseUrl . $ipList, [
-                'query' => $queryParams
+            $response = $this->client->get($this->baseUrl.$ipList, [
+                'query' => $queryParams,
             ]);
 
             $data = json_decode($response->getBody(), true);
@@ -145,13 +147,14 @@ class ProxyCheckService
         } catch (\Exception $e) {
             Log::warning('ProxyCheck Batch API Error', [
                 'ips' => $ips,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             $results = [];
             foreach ($ips as $ip) {
                 $results[$ip] = $this->getDefaultResponse($ip, $e->getMessage());
             }
+
             return $results;
         }
     }
@@ -172,7 +175,7 @@ class ProxyCheckService
             'region' => $data['region'] ?? null,
             'timezone' => $data['timezone'] ?? null,
             'last_seen' => isset($data['last seen']) ? (int) $data['last seen'] : null,
-            'checked_at' => now()->toISOString()
+            'checked_at' => now()->toISOString(),
         ];
     }
 
@@ -188,19 +191,21 @@ class ProxyCheckService
             'country_code' => 'XX',
             'provider' => 'Unknown',
             'error' => $error,
-            'checked_at' => now()->toISOString()
+            'checked_at' => now()->toISOString(),
         ];
     }
 
     public function isHighRisk(string $ip, int $threshold = 75): bool
     {
         $result = $this->checkIp($ip);
+
         return $result['risk_score'] >= $threshold;
     }
 
     public function isProxyOrVpn(string $ip): bool
     {
         $result = $this->checkIp($ip);
+
         return $result['is_proxy'] || $result['is_vpn'];
     }
 
@@ -213,7 +218,7 @@ class ProxyCheckService
             'country_code' => $result['country_code'],
             'city' => $result['city'],
             'region' => $result['region'],
-            'timezone' => $result['timezone']
+            'timezone' => $result['timezone'],
         ];
     }
 }

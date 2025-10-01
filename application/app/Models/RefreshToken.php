@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class RefreshToken extends Model
 {
@@ -17,14 +16,14 @@ class RefreshToken extends Model
         'ip_address',
         'user_agent',
         'is_active',
-        'last_used_at'
+        'last_used_at',
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
         'last_used_at' => 'datetime',
         'created_at' => 'datetime',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     protected static function boot()
@@ -68,7 +67,7 @@ class RefreshToken extends Model
 
     public function isValid(): bool
     {
-        return $this->is_active && !$this->isExpired();
+        return $this->is_active && ! $this->isExpired();
     }
 
     public function revoke(): bool

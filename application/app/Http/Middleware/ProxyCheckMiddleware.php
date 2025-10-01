@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\ProxyCheckService;
 use App\Models\IpSecurityCheck;
+use App\Services\ProxyCheckService;
 use App\Utils\Tools;
 use Closure;
 use Illuminate\Http\Request;
@@ -30,12 +30,13 @@ class ProxyCheckMiddleware
         }
 
         if ($this->shouldBypassSecurityCheck($ip)) {
-            Tools::logSecurityEvent(LogLevel::DEBUG, "Security check bypassed", [
+            Tools::logSecurityEvent(LogLevel::DEBUG, 'Security check bypassed', [
                 'ip_address' => $ip,
-                'reason' => 'IP whitelisted or development bypass'
+                'reason' => 'IP whitelisted or development bypass',
             ]);
 
             $this->storeSecurityResult($ip, ['bypassed' => true, 'reason' => 'whitelisted']);
+
             return $next($request);
         }
 
@@ -50,7 +51,7 @@ class ProxyCheckMiddleware
 
             $this->storeSecurityResult($ip, array_merge($ipInfo, [
                 'blocked' => true,
-                'block_reason' => $blockReasons
+                'block_reason' => $blockReasons,
             ]));
 
             return $this->createBlockResponse($ipInfo, $config);
@@ -89,8 +90,8 @@ class ProxyCheckMiddleware
             return true;
         }
 
-        if (!app()->environment('local')) {
-            $whitelist = array_filter($whitelist, fn($ip) => $ip !== '0.0.0.0/0');
+        if (! app()->environment('local')) {
+            $whitelist = array_filter($whitelist, fn ($ip) => $ip !== '0.0.0.0/0');
         }
 
         foreach ($whitelist as $whitelistedIp) {
@@ -118,7 +119,7 @@ class ProxyCheckMiddleware
 
     private function shouldBlockRequest(array $ipInfo, array $config): bool
     {
-        if ($config['log_only'] || !($ipInfo['success'] ?? false)) {
+        if ($config['log_only'] || ! ($ipInfo['success'] ?? false)) {
             return false;
         }
 
@@ -133,6 +134,7 @@ class ProxyCheckMiddleware
     private function createBlockResponse(array $ipInfo, array $config)
     {
         $reasons = $this->getHumanReadableReasons($ipInfo, $config);
+
         return Tools::securityBlockResponse($reasons, $ipInfo);
     }
 
@@ -161,8 +163,8 @@ class ProxyCheckMiddleware
             'security_info' => [
                 'real_ip' => $ip,
                 'ip_info' => $ipInfo,
-                'checked_at' => now()->toISOString()
-            ]
+                'checked_at' => now()->toISOString(),
+            ],
         ]);
     }
 
@@ -182,10 +184,11 @@ class ProxyCheckMiddleware
             $data = [
                 'ip_info' => $dbResult->security_data,
                 'checked_at' => $dbResult->checked_at,
-                'expires_at' => $dbResult->checked_at->addHours(24)
+                'expires_at' => $dbResult->checked_at->addHours(24),
             ];
 
             Cache::put("security_check_$ip", $data, now()->addHours(24));
+
             return $data;
         }
 
@@ -196,9 +199,9 @@ class ProxyCheckMiddleware
     {
         $ipInfo = $cachedResult['ip_info'];
 
-        Tools::logSecurityEvent(LogLevel::DEBUG, "Using cached security check", [
+        Tools::logSecurityEvent(LogLevel::DEBUG, 'Using cached security check', [
             'ip_address' => $ip,
-            'cached_at' => $cachedResult['checked_at']
+            'cached_at' => $cachedResult['checked_at'],
         ]);
 
         if (isset($ipInfo['blocked']) && $ipInfo['blocked']) {
@@ -206,6 +209,7 @@ class ProxyCheckMiddleware
         }
 
         $this->attachSecurityInfoToRequest($request, $ip, $ipInfo);
+
         return $next($request);
     }
 
@@ -219,20 +223,20 @@ class ProxyCheckMiddleware
                     'checked_at' => now(),
                     'risk_score' => $securityData['risk_score'] ?? 0,
                     'country' => $securityData['country'] ?? 'Unknown',
-                    'is_blocked' => $securityData['blocked'] ?? false
+                    'is_blocked' => $securityData['blocked'] ?? false,
                 ]
             );
 
             Cache::put("security_check_$ip", [
                 'ip_info' => $securityData,
                 'checked_at' => now(),
-                'expires_at' => now()->addHours(24)
+                'expires_at' => now()->addHours(24),
             ], now()->addHours(24));
 
         } catch (\Exception $e) {
-            Tools::logSystemEvent(LogLevel::ERROR, "Failed to store security result", [
+            Tools::logSystemEvent(LogLevel::ERROR, 'Failed to store security result', [
                 'ip_address' => $ip,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -300,6 +304,7 @@ class ProxyCheckMiddleware
                     break;
             }
         }
+
         return $config;
     }
 
@@ -309,7 +314,7 @@ class ProxyCheckMiddleware
             '127.0.0.1',
             '::1',
             'localhost',
-            '0.0.0.0'
+            '0.0.0.0',
         ];
 
         if (in_array($ip, $localhostIps)) {
@@ -335,7 +340,7 @@ class ProxyCheckMiddleware
 
     private function ipInRange(string $ip, string $range): bool
     {
-        if (!str_contains($range, '/')) {
+        if (! str_contains($range, '/')) {
             return false;
         }
 

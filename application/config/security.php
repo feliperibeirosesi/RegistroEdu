@@ -31,8 +31,8 @@ return [
             'development' => [
                 'gmail.com',
                 'teste.com',
-            ]
-        ]
+            ],
+        ],
     ],
 
     'api' => [
@@ -72,7 +72,7 @@ return [
         'HTTP_X_FORWARDED',
         'HTTP_X_CLUSTER_CLIENT_IP',
         'HTTP_CLIENT_IP',
-        'REMOTE_ADDR'
+        'REMOTE_ADDR',
     ],
 
     'advanced_blocking' => [
@@ -98,7 +98,7 @@ return [
             'low' => 25,
             'medium' => 60,
             'high' => 85,
-        ]
+        ],
     ],
 
     'honeypot' => [
@@ -107,8 +107,8 @@ return [
             '/admin',
             '/wp-admin',
             '/phpmyadmin',
-            '/.env'
+            '/.env',
         ],
         'ban_duration' => env('SECURITY_HONEYPOT_BAN_DURATION', 3600),
-    ]
+    ],
 ];

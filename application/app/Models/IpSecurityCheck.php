@@ -12,13 +12,13 @@ class IpSecurityCheck extends Model
         'risk_score',
         'country',
         'is_blocked',
-        'checked_at'
+        'checked_at',
     ];
 
     protected $casts = [
         'security_data' => 'array',
         'checked_at' => 'datetime',
-        'is_blocked' => 'boolean'
+        'is_blocked' => 'boolean',
     ];
 
     public static function isIpBlocked(string $ip): bool

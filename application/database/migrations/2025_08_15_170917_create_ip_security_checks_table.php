@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ip_security_checks', function (Blueprint $table) {
-            $table->id();
+            $table->id('id')->primary();
             $table->string('ip_address')->unique();
             $table->json('security_data');
             $table->integer('risk_score')->default(0);

@@ -12,6 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -37,7 +38,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
     ];
 
     public function sessions()

@@ -4,13 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 class Session extends Model
 {
     public $incrementing = false;
+
     protected $keyType = 'string';
+
     protected $primaryKey = 'id';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -18,7 +20,7 @@ class Session extends Model
         'ip_address',
         'user_agent',
         'payload',
-        'last_activity'
+        'last_activity',
     ];
 
     protected static function boot()

@@ -12,7 +12,7 @@ class Tools
     {
         $response = ['message' => $message];
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             $response = array_merge($response, $data);
         }
 
@@ -27,7 +27,7 @@ class Tools
     public static function error(string $message, int $statusCode = 400, array $details = []): JsonResponse
     {
         $data = [];
-        if (!empty($details)) {
+        if (! empty($details)) {
             $data['details'] = $details;
         }
 
@@ -45,7 +45,7 @@ class Tools
             'component' => 'authentication',
             'timestamp' => now()->toISOString(),
             'ip' => request()->ip(),
-            'user_agent' => request()->userAgent()
+            'user_agent' => request()->userAgent(),
         ]);
 
         Log::log($level, "[AUTH] {$message}", $context);
@@ -57,7 +57,7 @@ class Tools
             'component' => 'security',
             'timestamp' => now()->toISOString(),
             'ip' => request()->get('real_ip', request()->ip()),
-            'route' => request()->route()?->getName() ?? 'unknown'
+            'route' => request()->route()?->getName() ?? 'unknown',
         ]);
 
         Log::log($level, "[SECURITY] {$message}", $context);
@@ -67,7 +67,7 @@ class Tools
     {
         $context = array_merge($context, [
             'component' => 'system',
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
 
         Log::log($level, "[SYSTEM] {$message}", $context);
@@ -82,11 +82,11 @@ class Tools
             'HTTP_X_FORWARDED',
             'HTTP_X_CLUSTER_CLIENT_IP',
             'HTTP_CLIENT_IP',
-            'REMOTE_ADDR'
+            'REMOTE_ADDR',
         ];
 
         foreach ($trustedHeaders as $header) {
-            if (!empty($_SERVER[$header])) {
+            if (! empty($_SERVER[$header])) {
                 $ips = array_map('trim', explode(',', $_SERVER[$header]));
                 $ip = $ips[0];
 
@@ -101,7 +101,7 @@ class Tools
 
     public static function isValidPublicIp(string $ip): bool
     {
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
             return false;
         }
 
@@ -137,7 +137,7 @@ class Tools
             'reasons' => $reasons,
             'country' => $ipInfo['country'] ?? 'Unknown',
             'risk_score' => $ipInfo['risk_score'] ?? 0,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
     }
 
@@ -149,21 +149,21 @@ class Tools
             'risk_score' => $ipInfo['risk_score'] ?? 0,
             'is_proxy' => $ipInfo['is_proxy'] ?? false,
             'is_vpn' => $ipInfo['is_vpn'] ?? false,
-            'provider' => $ipInfo['provider'] ?? 'Unknown'
+            'provider' => $ipInfo['provider'] ?? 'Unknown',
         ];
     }
 
     public static function logLoginAttempt(bool $success, string $email, array $ipInfo = [], ?string $reason = null): void
     {
         $level = $success ? LogLevel::INFO : LogLevel::WARNING;
-        $message = $success ? "Login successful" : "Login failed";
+        $message = $success ? 'Login successful' : 'Login failed';
 
         $context = array_merge(
             self::getIpContext($ipInfo),
             [
                 'email' => $email,
                 'success' => $success,
-                'environment' => app()->environment()
+                'environment' => app()->environment(),
             ]
         );
 
@@ -177,14 +177,14 @@ class Tools
     public static function logIpSecurityCheck(string $ip, array $ipInfo, array $config, bool $blocked = false): void
     {
         $level = $blocked ? LogLevel::WARNING : LogLevel::INFO;
-        $message = $blocked ? "IP security check - Access blocked" : "IP security check - Access allowed";
+        $message = $blocked ? 'IP security check - Access blocked' : 'IP security check - Access allowed';
 
         $context = array_merge(
             self::getIpContext($ipInfo),
             [
                 'security_config' => $config,
                 'blocked' => $blocked,
-                'check_result' => $ipInfo
+                'check_result' => $ipInfo,
             ]
         );
 
