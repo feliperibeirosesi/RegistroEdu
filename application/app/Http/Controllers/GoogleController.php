@@ -238,7 +238,7 @@ class GoogleController extends Controller
             return Tools::securityBlockResponse($reasons, $ipInfo);
         }
 
-        return redirect(config('app.frontend_url', '/').'/login?error=blocked');
+        return redirect(config('app.frontend_url', '/loggedin').'/login?error=blocked');
     }
 
     private function findOrCreateUser($googleUser, string $ip, array $ipInfo): User
@@ -268,7 +268,8 @@ class GoogleController extends Controller
 
     private function handleWebRedirect(array $tokenData)
     {
-        return redirect('http://localhost:8000/singin')
+        return redirect('http://localhost:8000
+        /singin')
             ->cookie('access_token', $tokenData['access_token'], config('jwt.access_ttl', 60))
             ->cookie('refresh_token', $tokenData['refresh_token'], config('jwt.refresh_ttl', 20160), null, null, true, true);
     }

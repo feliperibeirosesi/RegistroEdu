@@ -11,14 +11,14 @@ export default defineConfig({
         react(),
     ],
     server: {
-        host: '0.0.0.0',
+        host: '127.0.0.1',
         port: 5173,
         cors: {
-            origin: 'http://localhost:8000',
+            origin: 'http://127.0.0.1:8000', // <== aqui
             credentials: true,
         },
         hmr: {
-            host: 'localhost',
+            host: '127.0.0.1', // <== aqui
             port: 5173,
         },
     },
