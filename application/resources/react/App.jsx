@@ -1,19 +1,43 @@
-import { Routes, Route } from 'react-router-dom';
-import ErrorBoundary from './components/ErrorBoundary';
+import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom'; ' ,'
+import { Button, Layout, theme } from 'antd'
+import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
+import ToggleThemeButton from './components/ToggleThemeButton'
+import MenuList from './components/MenuList'
 
 //importa as páginas
 import Home from './pages/Home';
 import SingIn from './pages/SingIn';
 import Teste from './pages/teste';
+import LoggedIn from './pages/LoggedIn'
+import Profile from './pages/Profile'
+const { Header, Sider } = Layout
 
 //função para as rotas
 function App() {
+    const [darkTheme, setDarkTheme] = useState(true)
+    const [collapsed, setCollapsed] = useState(true)
+
+    const toggleTheme = () => {
+        setDarkTheme(!darkTheme)
+    }
+
+    const { token: { colorBgContainer },
+    } = theme.useToken();
+
+
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/singin" element={<SingIn />} />
-            <Route path="/teste" element={<Teste />} />
-        </Routes>
+        <>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/singin" element={<SingIn />} />
+                <Route path="/teste" element={<Teste />} />
+                <Route path="/loggedin" element={<LoggedIn />} />
+                <Route path="/profile" element={<Profile />} />
+            </Routes>
+
+
+        </>
     );
 }
 

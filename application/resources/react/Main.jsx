@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { ErrorProvider, useError } from './contexts/ErrorContext';
 import App from './App';
-import ErrorPage from './components/Error'; // página de erro personalizada
+import ErrorPage from './components/Error';
 
 //decide se mostra a aplicação ou a página de erro
 function AppContent() {
@@ -42,4 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (preloader) preloader.remove();
 });
 
+createRoot(document.getElementById('root')).render(
+    <StrictMode>
+        <App />
+    </StrictMode>,
+)
+
+
 export default Main;
+
+
+
+
