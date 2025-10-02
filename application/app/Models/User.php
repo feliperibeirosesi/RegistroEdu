@@ -30,7 +30,10 @@ class User extends Authenticatable
         'email_verification_token',
         'admin_approved_at',
         'approved_by',
-        'rejection_reason'
+        'rejection_reason',
+        'two_factor_secret',
+        'two_factor_enabled',
+        'two_factor_verified'
     ];
 
     protected $casts = [
@@ -39,6 +42,8 @@ class User extends Authenticatable
         'ip_info' => 'array',
         'role' => 'string',
         'admin_approved_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_verified' => 'boolean',
     ];
 
     protected $hidden = [
@@ -47,6 +52,7 @@ class User extends Authenticatable
     ];
 
     const STATUS_PENDING_EMAIL = 'pending_email_verification';
+    const STATUS_PENDING_2FA = 'pending_two_factor';
     const STATUS_WAITING_ADMIN = 'waiting_admin_approval';
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
@@ -54,6 +60,11 @@ class User extends Authenticatable
     public function isEmailVerified(): bool
     {
         return !is_null($this->email_verified_at);
+    }
+
+    public function needsTwoFactor(): bool
+    {
+        return $this->status === self::STATUS_PENDING_2FA;
     }
 
     public function isApproved(): bool

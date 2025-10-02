@@ -248,6 +248,7 @@ class GoogleController extends Controller
     {
         $message = match($user->status) {
             User::STATUS_PENDING_EMAIL => 'Verifique seu email para continuar o processo de registro.',
+            User::STATUS_PENDING_2FA => 'Ative a autenticação em dois fatores para continuar.',
             User::STATUS_WAITING_ADMIN => 'Seu registro está sendo analisado. Aguarde a aprovação.',
             User::STATUS_REJECTED => 'Seu registro foi rejeitado. Entre em contato com o suporte.',
             default => 'Seu registro está pendente.'

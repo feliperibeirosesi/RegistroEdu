@@ -6,11 +6,19 @@ use App\Models\User;
 use App\Utils\Tools;
 use App\Helpers\SecurityEmailHelper;
 use App\Helpers\SecureTokenHelper;
+use App\Services\JWTService;
 use Illuminate\Http\Request;
 use Psr\Log\LogLevel;
 
 class EmailVerificationController extends Controller
 {
+    private JWTService $jwtService;
+
+    public function __construct(JWTService $jwtService)
+    {
+        $this->jwtService = $jwtService;
+    }
+
     public function verifyEmail(Request $request, $token)
     {
         $tokenData = SecureTokenHelper::validateEmailToken($token);
@@ -52,7 +60,7 @@ class EmailVerificationController extends Controller
 
         $user->update([
             'email_verified_at' => now(),
-            'status' => User::STATUS_WAITING_ADMIN,
+            'status' => User::STATUS_PENDING_2FA,
             'email_verification_token' => null,
         ]);
 
@@ -64,6 +72,16 @@ class EmailVerificationController extends Controller
         SecurityEmailHelper::sendWaitingApproval($user);
         SecurityEmailHelper::sendAdminNotification($user);
 
-        return redirect()->route('confirmed');
+        $tokenData = [
+            'access_token' => $this->jwtService->generateAccessToken($user),
+            'refresh_token' => $this->jwtService->generateRefreshToken($user),
+            'token_type' => 'Bearer',
+            'expires_in' => config('jwt.access_ttl', 60) * 60,
+            'user' => $user
+        ];
+
+        return redirect()->route('confirmed')
+            ->cookie('access_token', $tokenData['access_token'], config('jwt.access_ttl', 60))
+            ->cookie('refresh_token', $tokenData['refresh_token'], config('jwt.refresh_ttl', 20160), null, null, true, true);
     }
 }

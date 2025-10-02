@@ -9,19 +9,19 @@ class UserMiddleware
 {
     public function handle(Request $request, Closure $next, ...$allowedStatuses)
     {
-        $user = auth()->user();
+        $payload = $request->get('jwt_payload');
 
-        if (!$user) {
+        if (!$payload) {
             return response()->json([
                 'error' => 'Usuário não autenticado',
-                'code' => 'UNAUTHORIZED'
+                'code'  => 'UNAUTHORIZED',
             ], 401);
         }
 
-        if (!in_array($user->status, $allowedStatuses)) {
+        if (isset($payload['status']) && !in_array($payload['status'], $allowedStatuses)) {
             return response()->json([
                 'error' => 'Acesso negado para o status atual da conta',
-                'status' => $user->status,
+                'status' => $payload['status'],
                 'allowed_statuses' => $allowedStatuses,
                 'code' => 'FORBIDDEN_STATUS'
             ], 403);
@@ -30,3 +30,4 @@ class UserMiddleware
         return $next($request);
     }
 }
+

@@ -7,6 +7,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\TwoFactorController;
 
 Route::view('/error', 'pages.error')->name('error');
 Route::view('/status', 'pages.status')->name('status');
@@ -17,7 +18,13 @@ Route::middleware('throttle:5,1')->group(function () {
         ->name('verify.email');
 });
 
-Route::middleware(['throttle:10,1', 'jwt.auth', 'user:pending_email_verification,waiting_admin_approval,approved'])->group(function () {
+Route::middleware(['jwt.auth', 'user:pending_two_factor,waiting_admin_approval,approved'])->group(function () {
+    Route::get('/2fa/status', [TwoFactorController::class, 'status']);
+    Route::post('/2fa/generate', [TwoFactorController::class, 'generate']);
+    Route::post('/2fa/verify', [TwoFactorController::class, 'verify']);
+});
+
+Route::middleware(['throttle:10,1', 'jwt.auth', 'user:pending_email_verification,pending_two_factor,waiting_admin_approval,approved'])->group(function () {
     Route::prefix('account')->group(function () {
         Route::post('/resend-verification', [AccountController::class, 'resendEmailVerification'])
             ->name('account.resend-verification');

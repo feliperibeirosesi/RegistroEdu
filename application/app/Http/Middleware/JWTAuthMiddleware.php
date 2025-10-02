@@ -82,18 +82,9 @@ class JWTAuthMiddleware
 
     private function extractToken(Request $request): ?string
     {
-        $bearerToken = $request->bearerToken();
-        if ($bearerToken) {
-            return $bearerToken;
-        }
-
         $cookieToken = $request->cookie('access_token');
         if ($cookieToken) {
             return $cookieToken;
-        }
-
-        if (app()->environment('local', 'testing')) {
-            return $request->query('token');
         }
 
         return null;
