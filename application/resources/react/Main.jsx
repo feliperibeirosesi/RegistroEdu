@@ -6,6 +6,9 @@ import { ErrorProvider, useError } from './contexts/ErrorContext';
 import App from './App';
 import ErrorPage from './components/Error';
 
+import { StrictMode } from 'react'
+import './styles/page/index.css'
+
 function AppContent() {
     const { error } = useError();
 
@@ -39,4 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (preloader) preloader.remove();
 });
 
+createRoot(document.getElementById('root')).render(
+    <StrictMode>
+        <App />
+    </StrictMode>,
+)
+
+
 export default Main;
+
+
+
+

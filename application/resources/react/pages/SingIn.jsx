@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/page/register.css';
 
 //importanto uma biblioteca de recaptcha no react
-import Formulario from '../components/reCAPTCHA';
 
 function onChange(value) {
     console.log("Captcha value:", value)
@@ -28,7 +27,6 @@ const Register = () => {
                     <img src="./assets/register/google-icon.png" alt="Google" />
                     Entrar com Google
                 </a>
-                <Formulario />
             </div>
         </div>
     );
