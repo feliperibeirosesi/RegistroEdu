@@ -1,521 +1,489 @@
+@import "tailwindcss";
+
 * {
-  margin: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  list-style: none;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    list-style: none;
+    box-sizing: border-box;
 }
 
 .ant-menu-light.ant-menu-root.ant-menu-inline {
-  border-inline-end: transparent;
+    border-inline-end: transparent;
 }
 
 .ant-menu-light.ant-menu-root.ant-menu-vertical {
-  border-inline-end: transparent;
+    border-inline-end: transparent;
 }
 
 body.light {
-  background-color: #ffffff;
-  color: #000000;
-  height: 100vh;
+    background-color: #ffffff;
+    color: #000000;
+    height: 100vh;
 }
-
 
 body.dark {
-  background-color: #000000;
-  color: #ffffff;
-  height: 100vh;
+    background-color: #000000;
+    color: #ffffff;
+    height: 100vh;
 }
 
-
 body.light .sidebar {
-  background-color: #ffffff;
-  color: #000000;
+    background-color: #ffffff;
+    color: #000000;
 
-  height: 100vh;
+    height: 100vh;
 }
 
 body.dark .sidebar {
-  background-color: #000000;
-  color: #ffffff;
+    background-color: #000000;
+    color: #ffffff;
 
-  height: 100vh;
+    height: 100vh;
 }
 
-
-
 .logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-  padding: 10px;
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    padding: 10px;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  border-radius: 50%;
-  background: rgba(28, 17, 41, 0.88);
-
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    background: rgba(28, 17, 41, 0.88);
 }
 
 .ant-menu-dark,
-:where(.css-dev-only-do-not-override-1qh2bz5).ant-menu-dark>.ant-menu {
-  color: rgb(255, 255, 255);
-  background: rgb(0, 0, 0);
+:where(.css-dev-only-do-not-override-1qh2bz5).ant-menu-dark > .ant-menu {
+    color: rgb(255, 255, 255);
+    background: rgb(0, 0, 0);
 }
 
 .ant-layout-light,
 :where(.css-dev-only-do-not-override-l9pxc0).ant-layout {
-  color: rgb(0, 0, 0);
-  background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
 }
 
 .menu-bar {
-  height: 88vh;
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  font-size: 1rem;
-  position: relative;
-  color: inherit;
-
+    height: 88vh;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 1rem;
+    position: relative;
+    color: inherit;
 }
-
 
 .toggle-theme-btn {
-  position: absolute;
-  bottom: 30px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: inherit;
-
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: inherit;
 }
 
-
 .toggle {
-  margin-left: 15px;
-  color: inherit;
-
+    margin-left: 15px;
+    color: inherit;
 }
 
 .profile {
-  height: 150px;
-  width: 250px;
-  position: absolute;
-  top: 15%;
-  left: 29.5%;
-  border-radius: 30px;
-  background: white;
-  border: 1px solid #d9d9d9;
+    height: 150px;
+    width: 250px;
+    position: absolute;
+    top: 15%;
+    left: 29.5%;
+    border-radius: 30px;
+    background: white;
+    border: 1px solid #d9d9d9;
 }
 
 .div1 {
-  height: 150px;
-  width: 250px;
-  position: absolute;
-  top: 15%;
-  left: 47%;
-  border-radius: 30px;
-  background: white;
-  border: 1px solid #d9d9d9;
+    height: 150px;
+    width: 250px;
+    position: absolute;
+    top: 15%;
+    left: 47%;
+    border-radius: 30px;
+    background: white;
+    border: 1px solid #d9d9d9;
 }
 
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
+    0% {
+        background-position: 0% 50%;
+    }
 
-  50% {
-    background-position: 100% 50%;
-  }
+    50% {
+        background-position: 100% 50%;
+    }
 
-  100% {
-    background-position: 0% 50%;
-  }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 body.dark .div1 {
-  border: 1px solid #424242;
-  background: #000000
+    border: 1px solid #424242;
+    background: #000000;
 }
 
 body.dark .div1:hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.light .div1:hover {
-  background: linear-gradient(-45deg, #6176e3, #DA38CD);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    background: linear-gradient(-45deg, #6176e3, #da38cd);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
-
-
-
 .div2:hover {
-
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.dark .div2:hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.light .div2:hover {
-  background: linear-gradient(-45deg, #6176e3, #DA38CD);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #6176e3, #da38cd);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 }
 
 .div3:hover {
-
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.dark .div3:hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.light .div3:hover {
-  background: linear-gradient(-45deg, #6176e3, #DA38CD);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #6176e3, #da38cd);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 }
 
-
 .btn1:hover {
-
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.dark .btn1:hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 .btn2:hover {
-
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
 body.dark .btn2:hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
-
-
-
-
-
 
 .boneco {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 3%;
-  left: 3%;
-  background-color: transparent;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 3%;
+    left: 3%;
+    background-color: transparent;
 }
-
 
 .Icons1 {
-  position: absolute;
-  top: 25%;
-  left: 32%;
-  font-size: 17px
+    position: absolute;
+    top: 25%;
+    left: 32%;
+    font-size: 17px;
 }
 
-
 .seta {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 2.5%;
-  left: 77%;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 2.5%;
+    left: 77%;
 }
 
 .ant-btn {
-  font-size: 18px;
+    font-size: 18px;
 }
 
 .ant-btn.ant-btn-icon-only {
-  width: 50px;
+    width: 50px;
 }
 
-
-
-
 .div2 {
-  height: 150px;
-  width: 250px;
-  position: absolute;
-  top: 15%;
-  left: 64.5%;
-  border-radius: 30px;
-  border: 1px solid #d9d9d9;
-
+    height: 150px;
+    width: 250px;
+    position: absolute;
+    top: 15%;
+    left: 64.5%;
+    border-radius: 30px;
+    border: 1px solid #d9d9d9;
 }
 
 body.dark .div2 {
-  border: 1px solid #424242
+    border: 1px solid #424242;
 }
 
 .seta2 {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 4%;
-  left: 77.3%;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 4%;
+    left: 77.3%;
 }
 
-
 .estudante {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 4%;
-  left: 3%;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 4%;
+    left: 3%;
 }
 
 .div3 {
-  height: 150px;
-  width: 250px;
-  position: absolute;
-  top: 15%;
-  left: 82%;
-  border-radius: 30px;
-  border: 1px solid #d9d9d9;
-
-
+    height: 150px;
+    width: 250px;
+    position: absolute;
+    top: 15%;
+    left: 82%;
+    border-radius: 30px;
+    border: 1px solid #d9d9d9;
 }
 
 body.dark .div3 {
-  border: 1px solid #424242;
+    border: 1px solid #424242;
 }
 
 .bolsa {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 4%;
-  left: 3%;
-
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 4%;
+    left: 3%;
 }
 
 .seta3 {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 4%;
-  left: 77.3%;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 4%;
+    left: 77.3%;
 }
 
 .all {
-  height: 45px;
-  width: 70px;
-  position: absolute;
-  top: 43%;
-  left: 15%;
-  border-radius: 30px;
-
+    height: 45px;
+    width: 70px;
+    position: absolute;
+    top: 43%;
+    left: 15%;
+    border-radius: 30px;
 }
 
 p {
-  font-size: 14px;
-  color: white;
+    font-size: 14px;
+    color: white;
 }
 
 body.light p {
-  color: #000000;
+    color: #000000;
 }
 
 .engagement {
-  height: 45px;
-  width: 120px;
-  position: absolute;
-  top: 43%;
-  left: 20%;
-  border-radius: 30px;
-
+    height: 45px;
+    width: 120px;
+    position: absolute;
+    top: 43%;
+    left: 20%;
+    border-radius: 30px;
 }
 
 .visit {
-  height: 45px;
-  width: 70px;
-  position: absolute;
-  top: 43%;
-  left: 28.3%;
-  border-radius: 30px;
+    height: 45px;
+    width: 70px;
+    position: absolute;
+    top: 43%;
+    left: 28.3%;
+    border-radius: 30px;
 }
 
 .post {
-  height: 45px;
-  width: 70px;
-  position: absolute;
-  top: 43%;
-  left: 33.3%;
-  border-radius: 30px;
+    height: 45px;
+    width: 70px;
+    position: absolute;
+    top: 43%;
+    left: 33.3%;
+    border-radius: 30px;
 }
 
 .btn1 {
-  height: 330px;
-  width: 500px;
-  position: absolute;
-  top: 52%;
-  left: 15%;
-  border-radius: 30px;
-  background-color: white;
+    height: 330px;
+    width: 500px;
+    position: absolute;
+    top: 52%;
+    left: 15%;
+    border-radius: 30px;
+    background-color: white;
 }
 
 body.dark .btn1 {
-  background-color: #000000;
+    background-color: #000000;
 }
 
 .btn2 {
-  height: 330px;
-  width: 350px;
-  position: absolute;
-  top: 52%;
-  left: 48.4%;
-  border-radius: 30px;
-  background-color: white;
+    height: 330px;
+    width: 350px;
+    position: absolute;
+    top: 52%;
+    left: 48.4%;
+    border-radius: 30px;
+    background-color: white;
 }
 
 body.dark .btn2 {
-  background-color: #000000;
+    background-color: #000000;
 }
 
 .btn3 {
-  height: 330px;
-  width: 400px;
-  position: absolute;
-  top: 52%;
-  left: 72%;
-  border-radius: 30px;
-  background-color: #fff;
+    height: 330px;
+    width: 400px;
+    position: absolute;
+    top: 52%;
+    left: 72%;
+    border-radius: 30px;
+    background-color: #fff;
 }
 
 body.dark .btn3 {
-  background-color: #000000;
+    background-color: #000000;
 }
 
 .btn3:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 10px rgb(144, 52, 184);
-  transition: all 0.3s ease;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgb(144, 52, 184);
+    transition: all 0.3s ease;
 }
 
-body.dark .ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover {
-  background: linear-gradient(-45deg, #00A8AA, #4C1A57);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+body.dark
+    .ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover {
+    background: linear-gradient(-45deg, #00a8aa, #4c1a57);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 }
 
-body.light .ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover {
-  background: linear-gradient(-45deg, #6176e3, #DA38CD);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  border: transparent;
+body.light
+    .ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover {
+    background: linear-gradient(-45deg, #6176e3, #da38cd);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    border: transparent;
 }
 
-body.dark .ant-btn .ant-btn-icon>svg {
-  color: white;
+body.dark .ant-btn .ant-btn-icon > svg {
+    color: white;
 }
 
-body.light .ant-btn .ant-btn-icon>svg {
-  color: rgb(0, 0, 0);
+body.light .ant-btn .ant-btn-icon > svg {
+    color: rgb(0, 0, 0);
 }
 
 .filtro {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 43%;
-  left: 73.5%;
-  color: white;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 43%;
+    left: 73.5%;
+    color: white;
 }
 
 .calendario {
-  height: 50px;
-  width: 50px;
-  border-radius: 90px;
-  position: absolute;
-  top: 43%;
-  left: 77.3%;
+    height: 50px;
+    width: 50px;
+    border-radius: 90px;
+    position: absolute;
+    top: 43%;
+    left: 77.3%;
 }
 
 .DownloadPDF {
-  height: 50px;
-  width: 265px;
-  border-radius: 90px;
-  position: absolute;
-  top: 43%;
-  left: 81%;
+    height: 50px;
+    width: 265px;
+    border-radius: 90px;
+    position: absolute;
+    top: 43%;
+    left: 81%;
 }
