@@ -23,7 +23,7 @@ function Main() {
     return (
         <ErrorProvider>
             <BrowserRouter>
-                <AppContent />
+                <App />
             </BrowserRouter>
         </ErrorProvider>
     );
@@ -41,12 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const preloader = document.getElementById('preloader');
     if (preloader) preloader.remove();
 });
-
-createRoot(document.getElementById('root')).render(
-    <StrictMode>
-        <App />
-    </StrictMode>,
-)
 
 
 export default Main;
