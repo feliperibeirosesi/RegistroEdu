@@ -1,0 +1,22 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "chart.js": "^4.0.0",
+    "faker": "^5.5.3",
+    "react": "^19.0.0",
+    "react-chartjs-2": "^5.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/faker": "5.5.9",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "5.9.3",
+    "vite": "^7.0.0"
+  }
+}
