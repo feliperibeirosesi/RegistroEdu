@@ -23,13 +23,13 @@ export const options = {
   responsive: true,
   plugins: {
     title: {
-      display: true,
+      display: false,
       text: 'Presença ao longo do ano',
     },
   },
 };
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'];
 
 export const data = {
   labels,
