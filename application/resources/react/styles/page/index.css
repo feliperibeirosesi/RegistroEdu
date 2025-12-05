@@ -17,6 +17,12 @@
     border-inline-end: transparent;
 }
 
+body.dark button {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #424242;
+}
+
 body.light {
     background-color: #ffffff;
     color: #000000;
